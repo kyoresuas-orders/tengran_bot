@@ -2,6 +2,7 @@ require("dotenv").config();
 const fs = require("fs");
 const path = require("path");
 const { Telegraf } = require("telegraf");
+const loadTexts = require("./utils/loadTexts");
 const registerCommands = require("./utils/registerCommands");
 const registerHandlers = require("./handlers/registerHandlers");
 
@@ -11,11 +12,11 @@ if (!process.env.BOT_TOKEN) {
   process.exit(1);
 }
 
+// Создаем бота
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
 // Загрузка текстов
-const textsPath = path.join(__dirname, "data", "texts.json");
-const texts = JSON.parse(fs.readFileSync(textsPath, "utf-8"));
+const texts = loadTexts();
 
 // Регистрация команд
 registerCommands(bot, texts);
@@ -27,7 +28,7 @@ registerHandlers(bot, texts);
 bot
   .launch()
   .then(() => {
-    console.log("Бот успешно запущен.");
+    console.log("Бот успешно запущен");
   })
   .catch((err) => {
     console.error("Ошибка при запуске бота:", err);
