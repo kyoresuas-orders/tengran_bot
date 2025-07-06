@@ -7,7 +7,7 @@ function registerCommands(bot, texts) {
   for (const file of fs.readdirSync(dir)) {
     if (!file.endsWith(".js")) continue;
     try {
-      const command = require(path.join(commandsDir, file));
+      const command = require(path.join(dir, file));
 
       if (command.name && typeof command.execute === "function") {
         bot.command(command.name, (ctx) => command.execute(ctx, texts, bot));
