@@ -2,6 +2,8 @@ require("dotenv").config();
 const fs = require("fs");
 const path = require("path");
 const { Telegraf } = require("telegraf");
+const registerCommands = require("./utils/registerCommands");
+const registerHandlers = require("./handlers/registerHandlers");
 
 // Проверяем, задан ли токен
 if (!process.env.BOT_TOKEN) {
@@ -15,30 +17,11 @@ const bot = new Telegraf(process.env.BOT_TOKEN);
 const textsPath = path.join(__dirname, "data", "texts.json");
 const texts = JSON.parse(fs.readFileSync(textsPath, "utf-8"));
 
-// Динамическая регистрация команд
-const commandsDir = path.join(__dirname, "commands");
-fs.readdirSync(commandsDir)
-  .filter((file) => file.endsWith(".js"))
-  .forEach((file) => {
-    try {
-      const commandPath = path.join(commandsDir, file);
-      const command = require(commandPath);
+// Регистрация команд
+registerCommands(bot, texts);
 
-      if (command.name && typeof command.execute === "function") {
-        bot.command(command.name, (ctx) => command.execute(ctx, texts, bot));
-        console.log(`Команда /${command.name} успешно зарегистрирована.`);
-      } else {
-        console.warn(`Файл ${file} не является корректным модулем команды.`);
-      }
-    } catch (error) {
-      console.error(`Ошибка при регистрации команды из файла ${file}:`, error);
-    }
-  });
-
-// Обработка текстовых сообщений, которые не являются командами
-bot.on("text", (ctx) => {
-  ctx.replyWithHTML(texts.errors.unknown_command);
-});
+// Регистрация обработчиков
+registerHandlers(bot, texts);
 
 // Запуск бота
 bot
