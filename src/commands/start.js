@@ -1,15 +1,28 @@
+const { findUserById } = require("../database/users");
+const { mainMenuKeyboard, agreementKeyboard } = require("../keyboards");
+
 module.exports = {
   name: "start",
-  execute: (ctx, texts) => {
-    ctx.reply(texts.commands.start.reply, {
-      parse_mode: "HTML",
-      disable_web_page_preview: true,
-      reply_markup: {
-        inline_keyboard: [
-          [{ text: "Главное меню", callback_data: "menu:main" }],
-          [{ text: "Настройки", callback_data: "menu:settings" }],
-        ],
-      },
-    });
+  execute: async (ctx, texts) => {
+    try {
+      const user = await findUserById(ctx.from.id);
+
+      if (user) {
+        // Пользователь существует, показываем главное меню
+        await ctx.reply("Еще раз привет! (нужен текст)", mainMenuKeyboard);
+      } else {
+        // Пользователя нет, показываем кнопку согласия
+        await ctx.reply(
+          texts.commands.start.reply,
+          agreementKeyboard.extra({
+            parse_mode: "HTML",
+            disable_web_page_preview: true,
+          })
+        );
+      }
+    } catch (err) {
+      console.error("Ошибка в команде /start:", err);
+      await ctx.reply("Произошла ошибка, попробуйте позже.");
+    }
   },
 };
