@@ -19,7 +19,7 @@ const registerCallbacks = (bot) => {
     const callback = callbacks.get(callbackName);
 
     if (callback) {
-      callback.execute(ctx);
+      callback.execute(ctx, bot.context.texts);
     } else {
       console.error(`Колбэк обработчик для '${callbackName}' не найден.`);
       ctx.answerCbQuery("Ошибка: обработчик не найден.");

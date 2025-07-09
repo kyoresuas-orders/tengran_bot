@@ -16,6 +16,7 @@ const bot = new Telegraf(process.env.BOT_TOKEN);
 
 // Загрузка текстов
 const texts = loadTexts();
+bot.context.texts = texts;
 
 // Регистрация команд
 registerCommands(bot, texts);

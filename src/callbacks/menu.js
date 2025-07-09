@@ -1,6 +1,6 @@
 module.exports = {
   name: "menu",
-  execute: async (ctx) => {
+  execute: async (ctx, texts) => {
     const data = ctx.callbackQuery.data.split(":")[1];
     let replyText = "Этот раздел в разработке.";
 

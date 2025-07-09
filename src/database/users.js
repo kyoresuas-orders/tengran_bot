@@ -24,7 +24,13 @@ const createUser = async (user) => {
   try {
     const [result] = await pool.execute(
       "INSERT INTO `users` (`telegram_id`, `first_name`, `last_name`, `username`, `language_code`) VALUES (?, ?, ?, ?, ?)",
-      [id, first_name, last_name, username, language_code]
+      [
+        id,
+        first_name,
+        last_name || null,
+        username || null,
+        language_code || null,
+      ]
     );
     return result;
   } catch (error) {

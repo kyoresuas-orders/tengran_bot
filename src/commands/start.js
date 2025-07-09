@@ -9,16 +9,14 @@ module.exports = {
 
       if (user) {
         // Пользователь существует, показываем главное меню
-        await ctx.reply("Еще раз привет! (нужен текст)", mainMenuKeyboard);
+        await ctx.reply(texts.commands.start.authorized, mainMenuKeyboard);
       } else {
         // Пользователя нет, показываем кнопку согласия
-        await ctx.reply(
-          texts.commands.start.reply,
-          agreementKeyboard.extra({
-            parse_mode: "HTML",
-            disable_web_page_preview: true,
-          })
-        );
+        await ctx.reply(texts.commands.start.unauthorized, {
+          ...agreementKeyboard,
+          parse_mode: "HTML",
+          disable_web_page_preview: true,
+        });
       }
     } catch (err) {
       console.error("Ошибка в команде /start:", err);
