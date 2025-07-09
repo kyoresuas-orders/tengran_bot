@@ -14,7 +14,6 @@ const mainMenuKeyboard = Markup.inlineKeyboard([
   [Markup.button.callback("Связаться с поддержкой", "menu:support")],
 ]);
 
-// Клавиатура для подменю "Дом 10.GRAN"
 const houseMenuKeyboard = Markup.inlineKeyboard([
   [Markup.button.callback("О концепции", "menu:house_concept")],
   [Markup.button.callback("Адрес и график работы", "menu:house_address")],
@@ -22,7 +21,6 @@ const houseMenuKeyboard = Markup.inlineKeyboard([
   [Markup.button.callback("⬅️ Назад", "menu:back")],
 ]);
 
-// Универсальная клавиатура с одной кнопкой "Назад"
 const backKeyboard = Markup.inlineKeyboard([
   Markup.button.callback("⬅️ Назад", "menu:back"),
 ]);

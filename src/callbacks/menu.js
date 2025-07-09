@@ -1,10 +1,9 @@
 const {
+  backKeyboard,
   mainMenuKeyboard,
   houseMenuKeyboard,
-  backKeyboard,
 } = require("../data/keyboards");
 
-// Определяем все возможные "экраны" нашего меню
 const views = {
   main: (texts) => ({
     text: texts.commands.start.authorized,
@@ -48,9 +47,9 @@ const views = {
   }),
 };
 
-// Функция для отрисовки экрана
 async function renderView(ctx, viewName, texts) {
   const view = views[viewName] ? views[viewName](texts) : null;
+
   if (!view) {
     console.error(`Экран меню не найден: ${viewName}`);
     return;
@@ -65,7 +64,6 @@ async function renderView(ctx, viewName, texts) {
   }
 }
 
-// Карта для определения родительского меню
 const parentMap = {
   house: "main",
   about: "main",
@@ -81,7 +79,6 @@ const parentMap = {
 module.exports = {
   name: "menu",
   execute: async (ctx, texts) => {
-    // Инициализируем историю, если ее нет
     ctx.session.history = ctx.session.history || [];
 
     const data = ctx.callbackQuery.data.split(":")[1];
