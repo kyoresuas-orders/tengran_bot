@@ -2,6 +2,7 @@ require("dotenv").config();
 const { Telegraf } = require("telegraf");
 const loadTexts = require("./utils/loadTexts");
 const registerCommands = require("./utils/registerCommands");
+const registerCallbacks = require("./utils/registerCallbacks");
 const registerHandlers = require("./handlers/registerHandlers");
 
 // Проверяем, задан ли токен
@@ -21,6 +22,9 @@ registerCommands(bot, texts);
 
 // Регистрация обработчиков
 registerHandlers(bot, texts);
+
+// Регистрация колбэков
+registerCallbacks(bot);
 
 // Запуск бота
 bot
