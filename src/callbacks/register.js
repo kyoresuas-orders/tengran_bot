@@ -1,5 +1,5 @@
 const { createUser } = require("../database/users");
-const { mainMenuKeyboard } = require("../keyboards");
+const { mainMenuKeyboard } = require("../data/keyboards");
 
 module.exports = {
   name: "register",

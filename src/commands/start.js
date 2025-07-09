@@ -1,5 +1,5 @@
 const { findUserById } = require("../database/users");
-const { mainMenuKeyboard, agreementKeyboard } = require("../keyboards");
+const { mainMenuKeyboard, agreementKeyboard } = require("../data/keyboards");
 
 module.exports = {
   name: "start",

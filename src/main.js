@@ -1,6 +1,7 @@
 require("dotenv").config();
 const { Telegraf } = require("telegraf");
 const loadTexts = require("./utils/loadTexts");
+const LocalSession = require("telegraf-session-local");
 const registerCommands = require("./utils/registerCommands");
 const registerCallbacks = require("./utils/registerCallbacks");
 const registerHandlers = require("./handlers/registerHandlers");
@@ -13,6 +14,10 @@ if (!process.env.BOT_TOKEN) {
 
 // Создаем бота
 const bot = new Telegraf(process.env.BOT_TOKEN);
+
+// Подключаем сессии
+const session = new LocalSession({ database: "sessions.json" });
+bot.use(session.middleware());
 
 // Загрузка текстов
 const texts = loadTexts();
