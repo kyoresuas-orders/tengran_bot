@@ -1,6 +1,4 @@
 require("dotenv").config();
-const fs = require("fs");
-const path = require("path");
 const { Telegraf } = require("telegraf");
 const loadTexts = require("./utils/loadTexts");
 const registerCommands = require("./utils/registerCommands");
