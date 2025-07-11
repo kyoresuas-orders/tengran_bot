@@ -1,6 +1,10 @@
+const {
+  jewelryMenuKeyboard,
+  collectionsMenuKeyboard,
+  createCollectionKeyboard,
+} = require("../data/keyboards");
 const { Markup } = require("telegraf");
 const { scrapeProduct } = require("../utils/scraper");
-const { backKeyboard, jewelryMenuKeyboard } = require("../data/keyboards");
 
 const BESTSELLER_URLS = [
   "https://10gran.com/jewelry/ru/tproduct/356705929-520549432671-room-signet",
@@ -15,6 +19,29 @@ const BESTSELLER_URLS = [
   "https://10gran.com/jewelry/ru/tproduct/356705929-439945266516-luca",
   "https://10gran.com/jewelry/ru/tproduct/356705929-804700143121-room",
 ];
+
+const collectionsData = {
+  legacy: {
+    textKey: "collection_legacy",
+    buttonText: "рассмотреть украшения",
+    url: "https://10gran.com/jewelry/ru?tfc_charact:4318552%5B356705929%5D=Legacy&tfc_div=:::",
+  },
+  lilly: {
+    textKey: "collection_lilly",
+    buttonText: "рассмотреть украшения",
+    url: "https://10gran.com/jewelry/ru?tfc_charact:4318552%5B356705929%5D=Lilly&tfc_div=:::",
+  },
+  signals: {
+    textKey: "collection_signals",
+    buttonText: "рассмотреть сигналы",
+    url: "https://10gran.com/jewelry/ru?tfc_charact:4318552%5B356705929%5D=Signals&tfc_div=:::",
+  },
+  keys: {
+    textKey: "collection_keys",
+    buttonText: "рассмотреть ключи",
+    url: "https://10gran.com/jewelry/ru?tfc_charact:4318363%5B356705929%5D=Подвески&tfc_div=:::",
+  },
+};
 
 function createBestsellersKeyboard(currentIndex, productUrl) {
   const total = BESTSELLER_URLS.length;
@@ -90,16 +117,32 @@ async function showBestseller(ctx, page = 0, isEdit = false) {
 module.exports = {
   name: "jewelry",
   execute: async (ctx, texts) => {
-    const [, action, , pageStr] = ctx.callbackQuery.data.split(":");
-    const page = pageStr ? parseInt(pageStr, 10) : 0;
+    const dataParts = ctx.callbackQuery.data.split(":");
+    const action = dataParts[1];
 
     switch (action) {
       case "bestsellers":
         const isEdit = ctx.callbackQuery.message.photo !== undefined;
+        const page = dataParts[3] ? parseInt(dataParts[3], 10) : 0;
         await showBestseller(ctx, page, isEdit);
         break;
       case "all":
-        await ctx.editMessageText(texts.callbacks.menu.default, backKeyboard);
+        await ctx.editMessageText(
+          texts.callbacks.jewelry_submenu.all_intro,
+          collectionsMenuKeyboard
+        );
+        break;
+      case "collection":
+        const collectionName = dataParts[2];
+        const collection = collectionsData[collectionName];
+        if (collection) {
+          const text = texts.callbacks.jewelry_submenu[collection.textKey];
+          const keyboard = createCollectionKeyboard(
+            collection.buttonText,
+            collection.url
+          );
+          await ctx.editMessageText(text, keyboard);
+        }
         break;
       case "back":
         await ctx.deleteMessage();

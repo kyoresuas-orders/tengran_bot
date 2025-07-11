@@ -37,6 +37,21 @@ const jewelryMenuKeyboard = Markup.inlineKeyboard([
   [Markup.button.callback("⬅️ Назад", "menu:back")],
 ]);
 
+const collectionsMenuKeyboard = Markup.inlineKeyboard([
+  [Markup.button.callback("Legacy", "jewelry:collection:legacy")],
+  [Markup.button.callback("Lilly", "jewelry:collection:lilly")],
+  [Markup.button.callback("Signals", "jewelry:collection:signals")],
+  [Markup.button.callback("Серия “Ключи”", "jewelry:collection:keys")],
+  [Markup.button.callback("⬅️ Назад", "menu:jewelry")],
+]);
+
+function createCollectionKeyboard(buttonText, url) {
+  return Markup.inlineKeyboard([
+    [Markup.button.url(buttonText, url)],
+    [Markup.button.callback("⬅️ Назад", "jewelry:all")],
+  ]);
+}
+
 module.exports = {
   agreementKeyboard,
   mainMenuKeyboard,
@@ -44,4 +59,6 @@ module.exports = {
   sizesMenuKeyboard,
   backKeyboard,
   jewelryMenuKeyboard,
+  collectionsMenuKeyboard,
+  createCollectionKeyboard,
 };
