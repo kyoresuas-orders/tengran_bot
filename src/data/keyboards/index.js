@@ -31,10 +31,17 @@ const backKeyboard = Markup.inlineKeyboard([
   Markup.button.callback("⬅️ Назад", "menu:back"),
 ]);
 
+const jewelryMenuKeyboard = Markup.inlineKeyboard([
+  [Markup.button.callback("Наши бестселлеры", "jewelry:bestsellers")],
+  [Markup.button.callback("Все украшения", "jewelry:all")],
+  [Markup.button.callback("⬅️ Назад", "menu:back")],
+]);
+
 module.exports = {
   agreementKeyboard,
   mainMenuKeyboard,
   houseMenuKeyboard,
   sizesMenuKeyboard,
   backKeyboard,
+  jewelryMenuKeyboard,
 };
