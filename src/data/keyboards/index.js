@@ -21,6 +21,12 @@ const houseMenuKeyboard = Markup.inlineKeyboard([
   [Markup.button.callback("⬅️ Назад", "menu:back")],
 ]);
 
+const sizesMenuKeyboard = Markup.inlineKeyboard([
+  [Markup.button.callback("Определить размер кольца", "sizes:determine")],
+  [Markup.button.callback("История моих размеров", "sizes:history")],
+  [Markup.button.callback("⬅️ Назад", "menu:back")],
+]);
+
 const backKeyboard = Markup.inlineKeyboard([
   Markup.button.callback("⬅️ Назад", "menu:back"),
 ]);
@@ -29,5 +35,6 @@ module.exports = {
   agreementKeyboard,
   mainMenuKeyboard,
   houseMenuKeyboard,
+  sizesMenuKeyboard,
   backKeyboard,
 };

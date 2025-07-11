@@ -2,6 +2,7 @@ const {
   backKeyboard,
   mainMenuKeyboard,
   houseMenuKeyboard,
+  sizesMenuKeyboard,
 } = require("../data/keyboards");
 
 const views = {
@@ -34,8 +35,8 @@ const views = {
     keyboard: backKeyboard,
   }),
   sizes: (texts) => ({
-    text: texts.callbacks.menu.sizes,
-    keyboard: backKeyboard,
+    text: texts.callbacks.sizes_submenu.intro,
+    keyboard: sizesMenuKeyboard,
   }),
   service: (texts) => ({
     text: texts.callbacks.menu.service,
