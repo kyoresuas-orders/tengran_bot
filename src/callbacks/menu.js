@@ -87,10 +87,6 @@ module.exports = {
     if (data === "back") {
       const lastView = ctx.session.history.pop() || "main";
       await renderView(ctx, lastView, texts);
-    } else if (data === "support") {
-      await ctx.answerCbQuery(texts.callbacks.menu.support, {
-        show_alert: true,
-      });
     } else {
       const currentView = parentMap[data];
       if (currentView) {

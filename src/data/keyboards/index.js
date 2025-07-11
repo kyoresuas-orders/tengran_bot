@@ -11,7 +11,7 @@ const mainMenuKeyboard = Markup.inlineKeyboard([
   [Markup.button.callback("Размеры", "menu:sizes")],
   [Markup.button.callback("Сервис", "menu:service")],
   [Markup.button.callback("Узнать статус заказа", "menu:status")],
-  [Markup.button.callback("Связаться с поддержкой", "menu:support")],
+  [Markup.button.url("Связаться с поддержкой", "https://t.me/info10gran_bot")],
 ]);
 
 const houseMenuKeyboard = Markup.inlineKeyboard([
