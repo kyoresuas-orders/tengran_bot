@@ -5,6 +5,7 @@ const {
   sizesMenuKeyboard,
   serviceMenuKeyboard,
   jewelryMenuKeyboard,
+  managerKeyboard,
 } = require("../data/keyboards");
 
 const views = {
@@ -45,8 +46,8 @@ const views = {
     keyboard: serviceMenuKeyboard,
   }),
   status: (texts) => ({
-    text: "Функционал в разработке",
-    keyboard: backKeyboard,
+    text: texts.callbacks.status_text,
+    keyboard: managerKeyboard,
   }),
 };
 
