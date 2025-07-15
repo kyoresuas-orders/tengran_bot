@@ -27,6 +27,20 @@ const sizesMenuKeyboard = Markup.inlineKeyboard([
   [Markup.button.callback("⬅️ Назад", "menu:back")],
 ]);
 
+const serviceMenuKeyboard = Markup.inlineKeyboard([
+  [Markup.button.callback("Обновить покрытие", "service:update_coating")],
+  [Markup.button.callback("Передать на ремонт", "service:repair")],
+  [Markup.button.callback("Рассчитать сумму выкупа", "service:buyout")],
+  [Markup.button.callback("Правила возврата", "service:return_policy")],
+  [
+    Markup.button.callback(
+      "Как ухаживать за украшением?",
+      "service:jewelry_care"
+    ),
+  ],
+  [Markup.button.callback("⬅️ Назад", "menu:back")],
+]);
+
 const backKeyboard = Markup.inlineKeyboard([
   Markup.button.callback("⬅️ Назад", "menu:back"),
 ]);
@@ -53,8 +67,8 @@ function createCollectionKeyboard(buttonText, url) {
 }
 
 const managerKeyboard = Markup.inlineKeyboard([
-  [Markup.button.url("Перейти в чат", "https://t.me/info10gran_bot")],
-  [Markup.button.callback("⬅️ Назад", "menu:sizes")],
+  [Markup.button.url("Связаться с менеджером", "https://t.me/info10gran_bot")],
+  [Markup.button.callback("⬅️ Назад", "menu:back")],
 ]);
 
 module.exports = {
@@ -62,9 +76,10 @@ module.exports = {
   mainMenuKeyboard,
   houseMenuKeyboard,
   sizesMenuKeyboard,
+  serviceMenuKeyboard,
   backKeyboard,
+  managerKeyboard,
   jewelryMenuKeyboard,
   collectionsMenuKeyboard,
   createCollectionKeyboard,
-  managerKeyboard,
 };

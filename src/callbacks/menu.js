@@ -3,6 +3,7 @@ const {
   mainMenuKeyboard,
   houseMenuKeyboard,
   sizesMenuKeyboard,
+  serviceMenuKeyboard,
   jewelryMenuKeyboard,
 } = require("../data/keyboards");
 
@@ -40,11 +41,11 @@ const views = {
     keyboard: sizesMenuKeyboard,
   }),
   service: (texts) => ({
-    text: texts.callbacks.menu.service,
-    keyboard: backKeyboard,
+    text: texts.callbacks.service_submenu.intro,
+    keyboard: serviceMenuKeyboard,
   }),
   status: (texts) => ({
-    text: texts.callbacks.menu.status,
+    text: "Функционал в разработке",
     keyboard: backKeyboard,
   }),
 };
