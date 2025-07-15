@@ -42,5 +42,14 @@ bot
     console.error("Ошибка при запуске бота:", err);
   });
 
+// Обработка ошибок
+process.on("uncaughtException", (err) => {
+  console.error("Неперехваченное исключение:", err);
+});
+
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("Необработанный режект:", promise, "причина:", reason);
+});
+
 process.once("SIGINT", () => bot.stop("SIGINT"));
 process.once("SIGTERM", () => bot.stop("SIGTERM"));
