@@ -1,9 +1,12 @@
+const path = require("path");
+const { Input } = require("telegraf");
 const { backKeyboard } = require("../data/keyboards");
 
 const views = {
   determine: (texts) => ({
     text: texts.callbacks.sizes_submenu.determine_text,
     keyboard: backKeyboard,
+    photo: path.resolve(__dirname, "..", "images", "sizes.png"),
   }),
   history: (texts) => ({
     text: texts.callbacks.sizes_submenu.history_text,
@@ -20,9 +23,39 @@ async function renderView(ctx, viewName, texts) {
   }
 
   try {
-    await ctx.editMessageText(view.text, view.keyboard);
+    if (view.photo) {
+      try {
+        await ctx.editMessageMedia(
+          {
+            type: "photo",
+            media: Input.fromLocalFile(view.photo),
+            caption: view.text,
+          },
+          view.keyboard
+        );
+      } catch (e) {
+        if (e.description.includes("message can't be edited")) {
+          await ctx.deleteMessage();
+          await ctx.replyWithPhoto(Input.fromLocalFile(view.photo), {
+            caption: view.text,
+            ...view.keyboard,
+          });
+        } else {
+          throw e;
+        }
+      }
+    } else {
+      await ctx.editMessageText(view.text, view.keyboard);
+    }
   } catch (e) {
-    if (!e.description.includes("message is not modified")) {
+    if (e.description && !e.description.includes("message is not modified")) {
+      console.error("Ошибка в renderView (sizes):", e);
+    } else if (
+      e.description &&
+      e.description.includes("message to delete not found")
+    ) {
+      // ignore, message already deleted
+    } else if (!e.description) {
       console.error("Ошибка в renderView (sizes):", e);
     }
   }
