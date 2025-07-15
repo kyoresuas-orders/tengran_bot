@@ -52,6 +52,11 @@ function createCollectionKeyboard(buttonText, url) {
   ]);
 }
 
+const managerKeyboard = Markup.inlineKeyboard([
+  [Markup.button.url("Перейти в чат", "https://t.me/info10gran_bot")],
+  [Markup.button.callback("⬅️ Назад", "menu:sizes")],
+]);
+
 module.exports = {
   agreementKeyboard,
   mainMenuKeyboard,
@@ -61,4 +66,5 @@ module.exports = {
   jewelryMenuKeyboard,
   collectionsMenuKeyboard,
   createCollectionKeyboard,
+  managerKeyboard,
 };

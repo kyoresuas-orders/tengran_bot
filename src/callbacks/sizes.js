@@ -1,6 +1,6 @@
 const path = require("path");
 const { Input } = require("telegraf");
-const { backKeyboard } = require("../data/keyboards");
+const { backKeyboard, managerKeyboard } = require("../data/keyboards");
 
 const views = {
   determine: (texts) => ({
@@ -10,7 +10,7 @@ const views = {
   }),
   history: (texts) => ({
     text: texts.callbacks.sizes_submenu.history_text,
-    keyboard: backKeyboard,
+    keyboard: managerKeyboard,
   }),
 };
 
