@@ -7,6 +7,19 @@ const { Markup } = require("telegraf");
 const { scrapeProduct } = require("../utils/scraper");
 const { renderView } = require("../utils/render");
 
+function formatPrice(priceString) {
+  const digits = String(priceString).replace(/\D/g, "");
+  const integerPart = digits.slice(0, -2);
+
+  if (!integerPart) {
+    return priceString;
+  }
+
+  const formatted = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+
+  return `${formatted}₽`;
+}
+
 const BESTSELLER_URLS = [
   "https://10gran.com/jewelry/ru/tproduct/356705929-520549432671-room-signet",
   "https://10gran.com/jewelry/ru/tproduct/356705929-572685039482-round",
@@ -24,22 +37,22 @@ const BESTSELLER_URLS = [
 const collectionsData = {
   legacy: {
     textKey: "collection_legacy",
-    buttonText: "рассмотреть украшения",
+    buttonText: "Рассмотреть украшения",
     url: "https://10gran.com/jewelry/ru?tfc_charact:4318552%5B356705929%5D=Legacy&tfc_div=:::",
   },
   lilly: {
     textKey: "collection_lilly",
-    buttonText: "рассмотреть украшения",
+    buttonText: "Рассмотреть украшения",
     url: "https://10gran.com/jewelry/ru?tfc_charact:4318552%5B356705929%5D=Lilly&tfc_div=:::",
   },
   signals: {
     textKey: "collection_signals",
-    buttonText: "рассмотреть сигналы",
+    buttonText: "Рассмотреть сигналы",
     url: "https://10gran.com/jewelry/ru?tfc_charact:4318552%5B356705929%5D=Signals&tfc_div=:::",
   },
   keys: {
     textKey: "collection_keys",
-    buttonText: "рассмотреть ключи",
+    buttonText: "Рассмотреть ключи",
     url: "https://10gran.com/jewelry/ru?tfc_charact:4318363%5B356705929%5D=Подвески&tfc_div=:::",
   },
 };
@@ -93,7 +106,9 @@ module.exports = {
           return ctx.reply("Не удалось загрузить информацию о товаре.");
         }
         view = {
-          text: `<b>${product.name}</b>\n${product.brand}\n\nЦена: ${product.price}`,
+          text: `<b>${product.name}</b>\n${
+            product.brand
+          }\n\nЦена: ${formatPrice(product.price)}`,
           photo: product.imageUrl,
           keyboard: createBestsellersKeyboard(page, url),
           options: { parse_mode: "HTML" },
