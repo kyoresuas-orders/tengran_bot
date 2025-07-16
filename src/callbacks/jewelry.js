@@ -5,6 +5,7 @@ const {
 } = require("../data/keyboards");
 const { Markup } = require("telegraf");
 const { scrapeProduct } = require("../utils/scraper");
+const { renderView } = require("../utils/render");
 
 const BESTSELLER_URLS = [
   "https://10gran.com/jewelry/ru/tproduct/356705929-520549432671-room-signet",
@@ -51,7 +52,7 @@ function createBestsellersKeyboard(currentIndex, productUrl) {
   if (currentIndex > 0) {
     row1.push(
       Markup.button.callback(
-        "⬅️",
+        "<-",
         `jewelry:bestsellers:page:${currentIndex - 1}`
       )
     );
@@ -60,7 +61,7 @@ function createBestsellersKeyboard(currentIndex, productUrl) {
   if (currentIndex < total - 1) {
     row1.push(
       Markup.button.callback(
-        "➡️",
+        "->",
         `jewelry:bestsellers:page:${currentIndex + 1}`
       )
     );
@@ -69,49 +70,8 @@ function createBestsellersKeyboard(currentIndex, productUrl) {
   return Markup.inlineKeyboard([
     row1,
     [Markup.button.url("Заказать", productUrl)],
-    [Markup.button.callback("⬅️ Назад", "jewelry:back")],
+    [Markup.button.callback("<- Назад", "jewelry:back")],
   ]);
-}
-
-async function showBestseller(ctx, page = 0, isEdit = false) {
-  const url = BESTSELLER_URLS[page];
-  if (!url) {
-    console.error(`URL бестселлера не найден для страницы: ${page}`);
-    return ctx.reply("Товар не найден.");
-  }
-
-  const product = await scrapeProduct(url);
-
-  if (!product) {
-    return ctx.reply("Не удалось загрузить информацию о товаре.");
-  }
-
-  const caption = `<b>${product.name}</b>\n${product.brand}\n\nЦена: ${product.price}`;
-  const keyboard = createBestsellersKeyboard(page, url);
-
-  if (isEdit) {
-    try {
-      await ctx.editMessageMedia(
-        { type: "photo", media: product.imageUrl, caption, parse_mode: "HTML" },
-        keyboard
-      );
-    } catch (err) {
-      console.error("Не удалось отредактировать сообщение:", err);
-      await ctx.deleteMessage();
-      await ctx.replyWithPhoto(product.imageUrl, {
-        caption: caption,
-        parse_mode: "HTML",
-        ...keyboard,
-      });
-    }
-  } else {
-    await ctx.deleteMessage();
-    await ctx.replyWithPhoto(product.imageUrl, {
-      caption: caption,
-      parse_mode: "HTML",
-      ...keyboard,
-    });
-  }
 }
 
 module.exports = {
@@ -119,18 +79,31 @@ module.exports = {
   execute: async (ctx, texts) => {
     const dataParts = ctx.callbackQuery.data.split(":");
     const action = dataParts[1];
+    let view;
 
     switch (action) {
       case "bestsellers":
-        const isEdit = ctx.callbackQuery.message.photo !== undefined;
         const page = dataParts[3] ? parseInt(dataParts[3], 10) : 0;
-        await showBestseller(ctx, page, isEdit);
+        const url = BESTSELLER_URLS[page];
+        if (!url) {
+          return ctx.reply("Товар не найден.");
+        }
+        const product = await scrapeProduct(url);
+        if (!product) {
+          return ctx.reply("Не удалось загрузить информацию о товаре.");
+        }
+        view = {
+          text: `<b>${product.name}</b>\n${product.brand}\n\nЦена: ${product.price}`,
+          photo: product.imageUrl,
+          keyboard: createBestsellersKeyboard(page, url),
+          options: { parse_mode: "HTML" },
+        };
         break;
       case "all":
-        await ctx.editMessageText(
-          texts.callbacks.jewelry_submenu.all_intro,
-          collectionsMenuKeyboard
-        );
+        view = {
+          text: texts.callbacks.jewelry_submenu.all_intro,
+          keyboard: collectionsMenuKeyboard,
+        };
         break;
       case "collection":
         const collectionName = dataParts[2];
@@ -141,19 +114,23 @@ module.exports = {
             collection.buttonText,
             collection.url
           );
-          await ctx.editMessageText(text, keyboard);
+          view = { text, keyboard };
         }
         break;
       case "back":
-        await ctx.deleteMessage();
-        await ctx.reply(
-          texts.callbacks.jewelry_submenu.intro,
-          jewelryMenuKeyboard
-        );
+        view = {
+          text: texts.callbacks.jewelry_submenu.intro,
+          keyboard: jewelryMenuKeyboard,
+        };
         break;
       case "noop":
-        break;
+        return ctx.answerCbQuery();
     }
+
+    if (view) {
+      await renderView(ctx, view);
+    }
+
     await ctx.answerCbQuery();
   },
 };

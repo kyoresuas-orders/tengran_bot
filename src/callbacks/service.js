@@ -1,4 +1,5 @@
 const { managerKeyboard, backKeyboard } = require("../data/keyboards");
+const { renderView } = require("../utils/render");
 
 const views = {
   update_coating: (texts) => ({
@@ -23,23 +24,6 @@ const views = {
   }),
 };
 
-async function renderView(ctx, viewName, texts) {
-  const view = views[viewName] ? views[viewName](texts) : null;
-
-  if (!view) {
-    console.error(`Экран сервиса не найден: ${viewName}`);
-    return;
-  }
-
-  try {
-    await ctx.editMessageText(view.text, view.keyboard);
-  } catch (e) {
-    if (e.description && !e.description.includes("message is not modified")) {
-      console.error("Ошибка в renderView (service):", e);
-    }
-  }
-}
-
 module.exports = {
   name: "service",
   execute: async (ctx, texts) => {
@@ -48,7 +32,8 @@ module.exports = {
     ctx.session.history = ctx.session.history || [];
     ctx.session.history.push("service");
 
-    await renderView(ctx, data, texts);
+    const view = views[data](texts);
+    await renderView(ctx, view);
     await ctx.answerCbQuery();
   },
 };

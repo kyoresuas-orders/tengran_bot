@@ -1,5 +1,6 @@
 const { createUser } = require("../database/users");
 const { mainMenuKeyboard } = require("../data/keyboards");
+const { renderView } = require("../utils/render");
 
 module.exports = {
   name: "register",
@@ -9,16 +10,15 @@ module.exports = {
     if (data === "agree") {
       try {
         await createUser(ctx.from);
-
         await ctx.answerCbQuery(texts.callbacks.register.success);
 
-        await ctx.editMessageText(
-          texts.callbacks.register.welcome,
-          mainMenuKeyboard
-        );
+        const view = {
+          text: texts.callbacks.register.welcome,
+          keyboard: mainMenuKeyboard,
+        };
+        await renderView(ctx, view);
       } catch (err) {
         console.error("Не удалось зарегистрировать пользователя:", err);
-
         await ctx.answerCbQuery(texts.errors.database_error);
       }
     }

@@ -1,6 +1,6 @@
 const path = require("path");
-const { Input } = require("telegraf");
 const { backKeyboard, managerKeyboard } = require("../data/keyboards");
+const { renderView } = require("../utils/render");
 
 const views = {
   determine: (texts) => ({
@@ -14,53 +14,6 @@ const views = {
   }),
 };
 
-async function renderView(ctx, viewName, texts) {
-  const view = views[viewName] ? views[viewName](texts) : null;
-
-  if (!view) {
-    console.error(`Экран размеров не найден: ${viewName}`);
-    return;
-  }
-
-  try {
-    if (view.photo) {
-      try {
-        await ctx.editMessageMedia(
-          {
-            type: "photo",
-            media: Input.fromLocalFile(view.photo),
-            caption: view.text,
-          },
-          view.keyboard
-        );
-      } catch (e) {
-        if (e.description.includes("message can't be edited")) {
-          await ctx.deleteMessage();
-          await ctx.replyWithPhoto(Input.fromLocalFile(view.photo), {
-            caption: view.text,
-            ...view.keyboard,
-          });
-        } else {
-          throw e;
-        }
-      }
-    } else {
-      await ctx.editMessageText(view.text, view.keyboard);
-    }
-  } catch (e) {
-    if (e.description && !e.description.includes("message is not modified")) {
-      console.error("Ошибка в renderView (sizes):", e);
-    } else if (
-      e.description &&
-      e.description.includes("message to delete not found")
-    ) {
-      // ignore, message already deleted
-    } else if (!e.description) {
-      console.error("Ошибка в renderView (sizes):", e);
-    }
-  }
-}
-
 module.exports = {
   name: "sizes",
   execute: async (ctx, texts) => {
@@ -69,7 +22,8 @@ module.exports = {
     ctx.session.history = ctx.session.history || [];
     ctx.session.history.push("sizes");
 
-    await renderView(ctx, data, texts);
+    const view = views[data](texts);
+    await renderView(ctx, view);
     await ctx.answerCbQuery();
   },
 };

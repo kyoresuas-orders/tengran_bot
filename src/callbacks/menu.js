@@ -7,6 +7,7 @@ const {
   jewelryMenuKeyboard,
   managerKeyboard,
 } = require("../data/keyboards");
+const { renderView } = require("../utils/render");
 
 const views = {
   main: (texts) => ({
@@ -51,23 +52,6 @@ const views = {
   }),
 };
 
-async function renderView(ctx, viewName, texts) {
-  const view = views[viewName] ? views[viewName](texts) : null;
-
-  if (!view) {
-    console.error(`Экран меню не найден: ${viewName}`);
-    return;
-  }
-
-  try {
-    await ctx.editMessageText(view.text, view.keyboard);
-  } catch (e) {
-    if (!e.description.includes("message is not modified")) {
-      console.error("Ошибка в renderView:", e);
-    }
-  }
-}
-
 const parentMap = {
   house: "main",
   about: "main",
@@ -88,14 +72,16 @@ module.exports = {
     const data = ctx.callbackQuery.data.split(":")[1];
 
     if (data === "back") {
-      const lastView = ctx.session.history.pop() || "main";
-      await renderView(ctx, lastView, texts);
+      const lastViewName = ctx.session.history.pop() || "main";
+      const view = views[lastViewName](texts);
+      await renderView(ctx, view);
     } else {
       const currentView = parentMap[data];
       if (currentView) {
         ctx.session.history.push(currentView);
       }
-      await renderView(ctx, data, texts);
+      const view = views[data](texts);
+      await renderView(ctx, view);
     }
     await ctx.answerCbQuery();
   },
