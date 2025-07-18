@@ -6,6 +6,7 @@ const {
 const { Markup } = require("telegraf");
 const { scrapeProduct } = require("../utils/scraper");
 const { renderView } = require("../utils/render");
+const { getCollectionImagePaths } = require("../utils/fileUtils");
 
 function formatPrice(priceString) {
   const digits = String(priceString).replace(/\D/g, "");
@@ -56,6 +57,40 @@ const collectionsData = {
     url: "https://10gran.com/jewelry/ru?tfc_charact:4318363%5B356705929%5D=Подвески&tfc_div=:::",
   },
 };
+
+function createCollectionCarouselKeyboard(
+  collectionName,
+  currentIndex,
+  total,
+  url
+) {
+  const pageIndicator = `${currentIndex + 1}/${total}`;
+
+  const row1 = [];
+  if (currentIndex > 0) {
+    row1.push(
+      Markup.button.callback(
+        "<-",
+        `jewelry:collection_page:${collectionName}:${currentIndex - 1}`
+      )
+    );
+  }
+  row1.push(Markup.button.callback(pageIndicator, "jewelry:noop"));
+  if (currentIndex < total - 1) {
+    row1.push(
+      Markup.button.callback(
+        "->",
+        `jewelry:collection_page:${collectionName}:${currentIndex + 1}`
+      )
+    );
+  }
+
+  return Markup.inlineKeyboard([
+    row1,
+    [Markup.button.url(collectionsData[collectionName].buttonText, url)],
+    [Markup.button.callback("<- Назад", "jewelry:all")],
+  ]);
+}
 
 function createBestsellersKeyboard(currentIndex, productUrl) {
   const total = BESTSELLER_URLS.length;
@@ -121,15 +156,29 @@ module.exports = {
         };
         break;
       case "collection":
+      case "collection_page":
         const collectionName = dataParts[2];
         const collection = collectionsData[collectionName];
         if (collection) {
+          const imagePaths = getCollectionImagePaths(collectionName);
+          if (imagePaths.length === 0) {
+            return ctx.reply("В этой коллекции пока нет изображений.");
+          }
+
+          const page =
+            action === "collection_page" && dataParts[3]
+              ? parseInt(dataParts[3], 10)
+              : 0;
+          const imagePath = imagePaths[page];
+
           const text = texts.callbacks.jewelry_submenu[collection.textKey];
-          const keyboard = createCollectionKeyboard(
-            collection.buttonText,
+          const keyboard = createCollectionCarouselKeyboard(
+            collectionName,
+            page,
+            imagePaths.length,
             collection.url
           );
-          view = { text, keyboard };
+          view = { text, photo: imagePath, keyboard };
         }
         break;
       case "back":
