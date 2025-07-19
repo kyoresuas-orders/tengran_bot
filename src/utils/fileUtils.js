@@ -6,7 +6,7 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 function getCollectionImagePaths(collectionName) {
   const dir = path.join(
     __dirname,
-    "../images/collection",
+    "../data/images/collection",
     collectionName.toLowerCase()
   );
   if (!fs.existsSync(dir)) {

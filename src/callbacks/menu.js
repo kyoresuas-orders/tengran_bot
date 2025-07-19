@@ -6,6 +6,7 @@ const {
   serviceMenuKeyboard,
   jewelryMenuKeyboard,
   managerKeyboard,
+  loyaltyMenuKeyboard,
 } = require("../data/keyboards");
 const { renderView } = require("../utils/render");
 
@@ -21,28 +22,31 @@ const views = {
   house_concept: (texts) => ({
     text: texts.callbacks.house_submenu.concept,
     photos: [
-      "src/images/concept/1.jpeg",
-      "src/images/concept/2.jpeg",
-      "src/images/concept/3.jpg",
-      "src/images/concept/4.jpg",
-      "src/images/concept/5.jpg",
-      "src/images/concept/6.jpg",
+      "src/data/images/concept/1.jpeg",
+      "src/data/images/concept/2.jpeg",
+      "src/data/images/concept/3.jpg",
+      "src/data/images/concept/4.jpg",
+      "src/data/images/concept/5.jpg",
+      "src/data/images/concept/6.jpg",
     ],
     keyboard: backKeyboard,
   }),
   house_address: (texts) => ({
     text: texts.callbacks.house_submenu.address,
-    photo: "src/images/address.png",
+    photo: "src/data/images/address.png",
     keyboard: backKeyboard,
   }),
   house_exhibition: (texts) => ({
     text: texts.callbacks.house_submenu.exhibition,
-    photos: ["src/images/exhibition/1.jpeg", "src/images/exhibition/2.jpeg"],
+    photos: [
+      "src/data/images/exhibition/1.jpeg",
+      "src/data/images/exhibition/2.jpeg",
+    ],
     keyboard: backKeyboard,
   }),
   about: (texts) => ({
     text: texts.callbacks.menu.about,
-    photo: "src/images/about.png",
+    photo: "src/data/images/about.png",
     keyboard: backKeyboard,
   }),
   jewelry: (texts) => ({
@@ -56,6 +60,10 @@ const views = {
   service: (texts) => ({
     text: texts.callbacks.service_submenu.intro,
     keyboard: serviceMenuKeyboard,
+  }),
+  loyalty_program: (texts) => ({
+    text: texts.callbacks.service_submenu.loyalty_program_intro,
+    keyboard: loyaltyMenuKeyboard,
   }),
   status: (texts) => ({
     text: texts.callbacks.status_text,
@@ -73,6 +81,7 @@ const parentMap = {
   house_concept: "house",
   house_address: "house",
   house_exhibition: "house",
+  loyalty_program: "service",
 };
 
 module.exports = {

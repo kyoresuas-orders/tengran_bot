@@ -28,9 +28,9 @@ const sizesMenuKeyboard = Markup.inlineKeyboard([
 ]);
 
 const serviceMenuKeyboard = Markup.inlineKeyboard([
+  [Markup.button.callback("Программа лояльности", "service:loyalty_program")],
   [Markup.button.callback("Обновить покрытие", "service:update_coating")],
   [Markup.button.callback("Передать на ремонт", "service:repair")],
-  [Markup.button.callback("Рассчитать сумму выкупа", "service:buyout")],
   [Markup.button.callback("Правила возврата", "service:return_policy")],
   [
     Markup.button.callback(
@@ -43,6 +43,18 @@ const serviceMenuKeyboard = Markup.inlineKeyboard([
 
 const backKeyboard = Markup.inlineKeyboard([
   Markup.button.callback("<- Назад", "menu:back"),
+]);
+
+const loyaltyMenuKeyboard = Markup.inlineKeyboard([
+  [
+    Markup.button.callback(
+      "Знакомство с брендом",
+      "service:loyalty:acquaintance"
+    ),
+  ],
+  [Markup.button.callback("Друг бренда", "service:loyalty:friend")],
+  [Markup.button.callback("Рассчитать сумму выкупа", "service:buyout")],
+  [Markup.button.callback("<- Назад", "menu:service")],
 ]);
 
 const jewelryMenuKeyboard = Markup.inlineKeyboard([
@@ -80,6 +92,7 @@ module.exports = {
   serviceMenuKeyboard,
   backKeyboard,
   managerKeyboard,
+  loyaltyMenuKeyboard,
   jewelryMenuKeyboard,
   collectionsMenuKeyboard,
   createCollectionKeyboard,

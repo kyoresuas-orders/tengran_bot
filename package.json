@@ -10,7 +10,7 @@
     "migrate:down": "db-migrate down"
   },
   "keywords": [],
-  "author": "",
+  "author": "Kyoresuas",
   "license": "ISC",
   "description": "",
   "dependencies": {

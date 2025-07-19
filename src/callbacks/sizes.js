@@ -6,7 +6,7 @@ const views = {
   determine: (texts) => ({
     text: texts.callbacks.sizes_submenu.determine_text,
     keyboard: backKeyboard,
-    photo: path.resolve(__dirname, "..", "images", "sizes.png"),
+    photo: path.resolve(__dirname, "..", "data", "images", "sizes.png"),
   }),
   history: (texts) => ({
     text: texts.callbacks.sizes_submenu.history_text,

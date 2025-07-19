@@ -183,12 +183,12 @@ module.exports = {
         view = {
           text: texts.callbacks.jewelry_submenu.sets,
           photos: [
-            "src/images/sets/1.png",
-            "src/images/sets/2.png",
-            "src/images/sets/3.png",
-            "src/images/sets/4.png",
-            "src/images/sets/5.png",
-            "src/images/sets/6.png",
+            "src/data/images/sets/1.png",
+            "src/data/images/sets/2.png",
+            "src/data/images/sets/3.png",
+            "src/data/images/sets/4.png",
+            "src/data/images/sets/5.png",
+            "src/data/images/sets/6.png",
           ],
           keyboard: Markup.inlineKeyboard([
             Markup.button.callback("<- Назад", "jewelry:back"),
