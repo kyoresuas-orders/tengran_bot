@@ -46,9 +46,10 @@ const backKeyboard = Markup.inlineKeyboard([
 ]);
 
 const jewelryMenuKeyboard = Markup.inlineKeyboard([
-  [Markup.button.callback("Наши бестселлеры", "jewelry:bestsellers")],
-  [Markup.button.callback("Все украшения", "jewelry:all")],
-  [Markup.button.callback("<- Назад", "menu:back")],
+  [Markup.button.callback("Все коллекции", "jewelry:all")],
+  [Markup.button.callback("Бестселлеры", "jewelry:bestsellers")],
+  [Markup.button.callback("Рассмотреть сеты", "jewelry:sets")],
+  [Markup.button.callback("<- Назад", "menu:main")],
 ]);
 
 const collectionsMenuKeyboard = Markup.inlineKeyboard([

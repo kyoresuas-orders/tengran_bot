@@ -33,16 +33,32 @@ async function renderView(ctx, view) {
   try {
     if (isNextViewMediaGroup) {
       await ctx.deleteMessage().catch(() => {});
-      const mediaGroup = view.photos.map((photoPath) => ({
-        type: "photo",
-        media: isUrl(photoPath) ? photoPath : Input.fromLocalFile(photoPath),
-      }));
-      const mediaMessages = await ctx.replyWithMediaGroup(mediaGroup);
+
+      const photos = view.photos;
+      const chunkSize = 6;
+      const allMediaMessageIds = [];
+
+      for (let i = 0; i < photos.length; i += chunkSize) {
+        const chunk = photos.slice(i, i + chunkSize);
+        const mediaGroup = chunk.map((photoPath) => ({
+          type: "photo",
+          media: isUrl(photoPath) ? photoPath : Input.fromLocalFile(photoPath),
+        }));
+        try {
+          const mediaMessages = await ctx.replyWithMediaGroup(mediaGroup);
+          allMediaMessageIds.push(...mediaMessages.map((m) => m.message_id));
+        } catch (e) {
+          console.error("Failed to send media group chunk:", e);
+          await ctx.answerCbQuery(
+            "Не удалось отправить часть изображений. Возможно, они слишком большие."
+          );
+        }
+      }
       const textMessage = await ctx.reply(view.text, options);
 
       ctx.session.mediaGroupInfo = {
         textMessageId: textMessage.message_id,
-        mediaMessageIds: mediaMessages.map((m) => m.message_id),
+        mediaMessageIds: allMediaMessageIds,
       };
 
       return;

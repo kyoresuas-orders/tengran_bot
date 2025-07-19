@@ -20,6 +20,7 @@ const views = {
   }),
   jewelry_care: (texts) => ({
     text: texts.callbacks.service_submenu.jewelry_care_text,
+    photo: "src/images/care.png",
     keyboard: backKeyboard,
   }),
 };

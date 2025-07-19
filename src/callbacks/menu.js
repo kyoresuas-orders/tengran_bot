@@ -20,18 +20,29 @@ const views = {
   }),
   house_concept: (texts) => ({
     text: texts.callbacks.house_submenu.concept,
+    photos: [
+      "src/images/concept/1.jpeg",
+      "src/images/concept/2.jpeg",
+      "src/images/concept/3.jpeg",
+      "src/images/concept/4.jpeg",
+      "src/images/concept/5.jpeg",
+      "src/images/concept/6.jpeg",
+    ],
     keyboard: backKeyboard,
   }),
   house_address: (texts) => ({
     text: texts.callbacks.house_submenu.address,
+    photo: "src/images/address.png",
     keyboard: backKeyboard,
   }),
   house_exhibition: (texts) => ({
     text: texts.callbacks.house_submenu.exhibition,
+    photos: ["src/images/exhibition/1.jpeg", "src/images/exhibition/2.jpeg"],
     keyboard: backKeyboard,
   }),
   about: (texts) => ({
     text: texts.callbacks.menu.about,
+    photo: "src/images/about.png",
     keyboard: backKeyboard,
   }),
   jewelry: (texts) => ({

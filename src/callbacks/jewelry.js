@@ -146,6 +146,22 @@ module.exports = {
           view = { text, photos: imagePaths, keyboard };
         }
         break;
+      case "sets":
+        view = {
+          text: texts.callbacks.jewelry_submenu.sets,
+          photos: [
+            "src/images/sets/1.png",
+            "src/images/sets/2.png",
+            "src/images/sets/3.png",
+            "src/images/sets/4.png",
+            "src/images/sets/5.png",
+            "src/images/sets/6.png",
+          ],
+          keyboard: Markup.inlineKeyboard([
+            Markup.button.callback("<- Назад", "jewelry:back"),
+          ]),
+        };
+        break;
       case "back":
         view = {
           text: texts.callbacks.jewelry_submenu.intro,
