@@ -6,3 +6,6 @@
 
 # Sessions
 sessions.json
+
+# MacOS
+.DS_Store
