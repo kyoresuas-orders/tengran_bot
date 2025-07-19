@@ -21,18 +21,51 @@ function formatPrice(priceString) {
   return `${formatted}₽`;
 }
 
-const BESTSELLER_URLS = [
-  "https://10gran.com/jewelry/ru/tproduct/356705929-520549432671-room-signet",
-  "https://10gran.com/jewelry/ru/tproduct/356705929-572685039482-round",
-  "https://10gran.com/jewelry/ru/tproduct/356705929-253811362662-square",
-  "https://10gran.com/jewelry/ru/tproduct/356705929-815568690521-ribs",
-  "https://10gran.com/jewelry/ru/tproduct/356705929-325462902711-ribs-s",
-  "https://10gran.com/jewelry/ru/tproduct/356705929-267367298022-klyuch",
-  "https://10gran.com/jewelry/ru/tproduct/356705929-188624234642-bui-romb",
-  "https://10gran.com/jewelry/ru/tproduct/356705929-372088483182-bui-shar",
-  "https://10gran.com/jewelry/ru/tproduct/356705929-676067730111-ribs-hoops",
-  "https://10gran.com/jewelry/ru/tproduct/356705929-439945266516-luca",
-  "https://10gran.com/jewelry/ru/tproduct/356705929-804700143121-room",
+const BESTSELLERS_DATA = [
+  {
+    url: "https://10gran.com/jewelry/ru/tproduct/356705929-520549432671-room-signet",
+    coating: "Серебро 925, покрытие из родия",
+  },
+  {
+    url: "https://10gran.com/jewelry/ru/tproduct/356705929-572685039482-round",
+    coating: "Серебро 925, покрытие из золота",
+  },
+  {
+    url: "https://10gran.com/jewelry/ru/tproduct/356705929-253811362662-square",
+    coating: "Серебро 925, покрытие из родия",
+  },
+  {
+    url: "https://10gran.com/jewelry/ru/tproduct/356705929-815568690521-ribs",
+    coating: "Серебро 925, покрытие из золота",
+  },
+  {
+    url: "https://10gran.com/jewelry/ru/tproduct/356705929-325462902711-ribs-s",
+    coating: "Серебро 925, покрытие из родия",
+  },
+  {
+    url: "https://10gran.com/jewelry/ru/tproduct/356705929-267367298022-klyuch",
+    coating: "Серебро 925, покрытие из золота",
+  },
+  {
+    url: "https://10gran.com/jewelry/ru/tproduct/356705929-188624234642-bui-romb",
+    coating: "Серебро 925, покрытие из родия",
+  },
+  {
+    url: "https://10gran.com/jewelry/ru/tproduct/356705929-372088483182-bui-shar",
+    coating: "Серебро 925, покрытие из золота",
+  },
+  {
+    url: "https://10gran.com/jewelry/ru/tproduct/356705929-676067730111-ribs-hoops",
+    coating: "Серебро 925, покрытие из родия",
+  },
+  {
+    url: "https://10gran.com/jewelry/ru/tproduct/356705929-439945266516-luca",
+    coating: "Серебро 925, покрытие из родия",
+  },
+  {
+    url: "https://10gran.com/jewelry/ru/tproduct/356705929-804700143121-room",
+    coating: "Серебро 925, покрытие из родия",
+  },
 ];
 
 const collectionsData = {
@@ -59,7 +92,7 @@ const collectionsData = {
 };
 
 function createBestsellersKeyboard(currentIndex, productUrl) {
-  const total = BESTSELLER_URLS.length;
+  const total = BESTSELLERS_DATA.length;
   const pageIndicator = `${currentIndex + 1}/${total}`;
 
   const row1 = [];
@@ -98,20 +131,20 @@ module.exports = {
     switch (action) {
       case "bestsellers":
         const page = dataParts[3] ? parseInt(dataParts[3], 10) : 0;
-        const url = BESTSELLER_URLS[page];
-        if (!url) {
+        const bestsellerData = BESTSELLERS_DATA[page];
+        if (!bestsellerData) {
           return ctx.reply("Товар не найден.");
         }
-        const product = await scrapeProduct(url);
+        const product = await scrapeProduct(bestsellerData.url);
         if (!product) {
           return ctx.reply("Не удалось загрузить информацию о товаре.");
         }
         view = {
-          text: `<b>${product.name}</b>\n${
-            product.brand
+          text: `<b>${product.name}</b>\n${product.brand}\n${
+            bestsellerData.coating
           }\n\nЦена: ${formatPrice(product.price)}`,
           photo: product.imageUrl,
-          keyboard: createBestsellersKeyboard(page, url),
+          keyboard: createBestsellersKeyboard(page, bestsellerData.url),
           options: { parse_mode: "HTML" },
         };
         break;
