@@ -58,40 +58,6 @@ const collectionsData = {
   },
 };
 
-function createCollectionCarouselKeyboard(
-  collectionName,
-  currentIndex,
-  total,
-  url
-) {
-  const pageIndicator = `${currentIndex + 1}/${total}`;
-
-  const row1 = [];
-  if (currentIndex > 0) {
-    row1.push(
-      Markup.button.callback(
-        "<-",
-        `jewelry:collection_page:${collectionName}:${currentIndex - 1}`
-      )
-    );
-  }
-  row1.push(Markup.button.callback(pageIndicator, "jewelry:noop"));
-  if (currentIndex < total - 1) {
-    row1.push(
-      Markup.button.callback(
-        "->",
-        `jewelry:collection_page:${collectionName}:${currentIndex + 1}`
-      )
-    );
-  }
-
-  return Markup.inlineKeyboard([
-    row1,
-    [Markup.button.url(collectionsData[collectionName].buttonText, url)],
-    [Markup.button.callback("<- Назад", "jewelry:all")],
-  ]);
-}
-
 function createBestsellersKeyboard(currentIndex, productUrl) {
   const total = BESTSELLER_URLS.length;
   const pageIndicator = `${currentIndex + 1}/${total}`;
@@ -165,20 +131,19 @@ module.exports = {
             return ctx.reply("В этой коллекции пока нет изображений.");
           }
 
-          const page =
-            action === "collection_page" && dataParts[3]
-              ? parseInt(dataParts[3], 10)
-              : 0;
-          const imagePath = imagePaths[page];
-
           const text = texts.callbacks.jewelry_submenu[collection.textKey];
-          const keyboard = createCollectionCarouselKeyboard(
-            collectionName,
-            page,
-            imagePaths.length,
-            collection.url
-          );
-          view = { text, photo: imagePath, keyboard };
+
+          const keyboard = Markup.inlineKeyboard([
+            [
+              Markup.button.url(
+                collectionsData[collectionName].buttonText,
+                collectionsData[collectionName].url
+              ),
+            ],
+            [Markup.button.callback("<- Назад", "jewelry:all")],
+          ]);
+
+          view = { text, photos: imagePaths, keyboard };
         }
         break;
       case "back":
