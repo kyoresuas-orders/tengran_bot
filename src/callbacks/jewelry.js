@@ -191,7 +191,8 @@ module.exports = {
             "src/data/images/sets/6.png",
           ],
           keyboard: Markup.inlineKeyboard([
-            Markup.button.callback("<- Назад", "jewelry:back"),
+            [Markup.button.url("Рассмотреть сеты", "https://10gran.com/sets")],
+            [Markup.button.callback("<- Назад", "jewelry:back")],
           ]),
         };
         break;
