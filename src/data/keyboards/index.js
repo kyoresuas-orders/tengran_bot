@@ -45,6 +45,10 @@ const backKeyboard = Markup.inlineKeyboard([
   Markup.button.callback("<- Назад", "menu:back"),
 ]);
 
+const serviceBackKeyboard = Markup.inlineKeyboard([
+  Markup.button.callback("<- Назад", "menu:service"),
+]);
+
 const loyaltyMenuKeyboard = Markup.inlineKeyboard([
   [
     Markup.button.callback(
@@ -81,12 +85,12 @@ function createCollectionKeyboard(buttonText, url) {
 
 const managerKeyboard = Markup.inlineKeyboard([
   [Markup.button.url("Связаться с менеджером", "https://t.me/info10gran")],
-  [Markup.button.callback("<- Назад", "menu:back")],
+  [Markup.button.callback("<- Назад", "menu:service")],
 ]);
 
 const managerReturnKeyboard = Markup.inlineKeyboard([
   [Markup.button.url("Оформить возврат", "https://t.me/info10gran")],
-  [Markup.button.callback("<- Назад", "menu:back")],
+  [Markup.button.callback("<- Назад", "menu:service")],
 ]);
 
 module.exports = {
@@ -96,6 +100,7 @@ module.exports = {
   sizesMenuKeyboard,
   serviceMenuKeyboard,
   backKeyboard,
+  serviceBackKeyboard,
   managerKeyboard,
   managerReturnKeyboard,
   loyaltyMenuKeyboard,

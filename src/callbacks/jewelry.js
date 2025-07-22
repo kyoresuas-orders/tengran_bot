@@ -171,7 +171,12 @@ module.exports = {
             [Markup.button.callback("<- Назад", "jewelry:all")],
           ]);
 
-          view = { text, photos: imagePaths, keyboard };
+          view = {
+            text,
+            photos: imagePaths,
+            keyboard,
+            options: { parse_mode: "HTML" },
+          };
         }
         break;
       case "sets":

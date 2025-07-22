@@ -1,7 +1,7 @@
 const {
   managerKeyboard,
   managerReturnKeyboard,
-  backKeyboard,
+  serviceBackKeyboard,
   loyaltyMenuKeyboard,
 } = require("../data/keyboards");
 const { renderView } = require("../utils/render");
@@ -13,11 +13,11 @@ const views = {
   }),
   "loyalty:acquaintance": (texts) => ({
     text: texts.callbacks.service_submenu.loyalty_acquaintance,
-    keyboard: backKeyboard,
+    keyboard: serviceBackKeyboard,
   }),
   "loyalty:friend": (texts) => ({
     text: texts.callbacks.service_submenu.loyalty_friend,
-    keyboard: backKeyboard,
+    keyboard: serviceBackKeyboard,
   }),
   update_coating: (texts) => ({
     text: texts.callbacks.service_submenu.update_coating_text,
@@ -34,11 +34,14 @@ const views = {
   return_policy: (texts) => ({
     text: texts.callbacks.service_submenu.return_policy_text,
     keyboard: managerReturnKeyboard,
+    extra: {
+      disable_web_page_preview: true,
+    },
   }),
   jewelry_care: (texts) => ({
     text: texts.callbacks.service_submenu.jewelry_care_text,
     photo: "src/data/images/care.png",
-    keyboard: backKeyboard,
+    keyboard: serviceBackKeyboard,
   }),
 };
 
