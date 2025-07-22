@@ -17,11 +17,9 @@ function getCollectionImagePaths(collectionName) {
     .filter((file) => {
       const filePath = path.join(dir, file);
       const stats = fs.statSync(filePath);
+      const ext = path.extname(file).toLowerCase();
       const isSupportedType =
-        file.endsWith(".jpg") ||
-        file.endsWith(".png") ||
-        file.endsWith(".jpeg") ||
-        file.endsWith(".webp");
+        ext === ".jpg" || ext === ".png" || ext === ".jpeg" || ext === ".webp";
       return isSupportedType && stats.size <= MAX_FILE_SIZE;
     })
     .map((file) => path.join(dir, file));
