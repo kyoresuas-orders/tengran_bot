@@ -22,12 +22,12 @@ const views = {
   house_concept: (texts) => ({
     text: texts.callbacks.house_submenu.concept,
     photos: [
-      "src/data/images/concept/1.JPG",
-      "src/data/images/concept/2.JPEG",
-      "src/data/images/concept/3.JPEG",
-      "src/data/images/concept/4.JPEG",
-      "src/data/images/concept/5.JPEG",
-      "src/data/images/concept/6.JPEG",
+      "src/data/images/concept/1.jpg",
+      "src/data/images/concept/2.jpeg",
+      "src/data/images/concept/3.jpeg",
+      "src/data/images/concept/4.jpeg",
+      "src/data/images/concept/5.jpeg",
+      "src/data/images/concept/6.jpeg",
     ],
     keyboard: backKeyboard,
   }),
