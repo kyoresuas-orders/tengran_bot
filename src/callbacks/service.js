@@ -1,5 +1,6 @@
 const {
   managerKeyboard,
+  managerReturnKeyboard,
   backKeyboard,
   loyaltyMenuKeyboard,
 } = require("../data/keyboards");
@@ -32,7 +33,7 @@ const views = {
   }),
   return_policy: (texts) => ({
     text: texts.callbacks.service_submenu.return_policy_text,
-    keyboard: managerKeyboard,
+    keyboard: managerReturnKeyboard,
   }),
   jewelry_care: (texts) => ({
     text: texts.callbacks.service_submenu.jewelry_care_text,

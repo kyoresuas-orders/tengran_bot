@@ -84,6 +84,11 @@ const managerKeyboard = Markup.inlineKeyboard([
   [Markup.button.callback("<- Назад", "menu:back")],
 ]);
 
+const managerReturnKeyboard = Markup.inlineKeyboard([
+  [Markup.button.url("Оформить возврат", "https://t.me/info10gran")],
+  [Markup.button.callback("<- Назад", "menu:back")],
+]);
+
 module.exports = {
   agreementKeyboard,
   mainMenuKeyboard,
@@ -92,6 +97,7 @@ module.exports = {
   serviceMenuKeyboard,
   backKeyboard,
   managerKeyboard,
+  managerReturnKeyboard,
   loyaltyMenuKeyboard,
   jewelryMenuKeyboard,
   collectionsMenuKeyboard,
