@@ -52,8 +52,22 @@ const isAdmin = async (telegramId) => {
   }
 };
 
+/**
+ * Получает всех пользователей из базы данных
+ */
+const getAllUsers = async () => {
+  try {
+    const [rows] = await pool.execute("SELECT * FROM `users`");
+    return rows;
+  } catch (error) {
+    console.error("Ошибка в getAllUsers:", error);
+    throw error;
+  }
+};
+
 module.exports = {
   findUserById,
   createUser,
   isAdmin,
+  getAllUsers,
 };
