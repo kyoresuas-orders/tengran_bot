@@ -4,21 +4,16 @@ const {
   createCollectionKeyboard,
 } = require("../data/keyboards");
 const { Markup } = require("telegraf");
-const { scrapeProduct } = require("../utils/scraper");
 const { renderView } = require("../utils/render");
+const { scrapeProduct } = require("../utils/scraper");
 const { getCollectionImagePaths } = require("../utils/fileUtils");
 
 function formatPrice(priceString) {
-  const digits = String(priceString).replace(/\D/g, "");
-  const integerPart = digits.slice(0, -2);
-
-  if (!integerPart) {
+  const number = Number(priceString);
+  if (isNaN(number)) {
     return priceString;
   }
-
-  const formatted = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-
-  return `${formatted}₽`;
+  return new Intl.NumberFormat("ru-RU").format(number) + "₽";
 }
 
 const BESTSELLERS_DATA = [
