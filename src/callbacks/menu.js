@@ -9,6 +9,7 @@ const {
   loyaltyMenuKeyboard,
 } = require("../data/keyboards");
 const { renderView } = require("../utils/render");
+const { initiateSupportFlow } = require("../utils/supportFlow");
 
 const views = {
   main: (texts) => ({
@@ -90,6 +91,10 @@ module.exports = {
     ctx.session.history = ctx.session.history || [];
 
     const data = ctx.callbackQuery.data.split(":")[1];
+
+    if (data === "status") {
+      return initiateSupportFlow(ctx, texts.support_requests.status);
+    }
 
     if (data === "back") {
       if (ctx.session.state === "awaiting_support_message") {
