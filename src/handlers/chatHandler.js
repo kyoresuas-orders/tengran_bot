@@ -13,7 +13,9 @@ const {
   getOpenTicketByManagerId,
   getTicketById,
   setTicketSupportChatMessageId,
+  getMessagesByTicketId,
 } = require("../database/tickets");
+const { Buffer } = require("buffer");
 
 async function handleSupportMessage(ctx, texts) {
   const fromId = ctx.from.id;
@@ -151,23 +153,45 @@ async function handleSupportMessage(ctx, texts) {
 async function updateClosedTicketMessage(ctx, ticketInfo, closedBy) {
   if (!ticketInfo.support_chat_message_id) return;
 
-  // Получаем свежие данные, включая имя пользователя
   const freshTicketInfo = await getTicketById(ticketInfo.id);
   if (!freshTicketInfo) return;
 
+  const messages = await getMessagesByTicketId(ticketInfo.id);
+
+  let fileContent = `История переписки по заявке #${ticketInfo.id}\n\n`;
+  if (messages.length > 0) {
+    messages.forEach((msg) => {
+      const date = new Date(msg.created_at).toLocaleString("ru-RU");
+      fileContent += `[${date}] ${msg.sender_type} (${msg.sender_id}):\n${msg.message}\n\n`;
+    });
+  } else {
+    fileContent += "Сообщений в этой переписке не было.";
+  }
+
+  const buffer = Buffer.from(fileContent, "utf-8");
+
   const userLink = `[${freshTicketInfo.user_first_name}](tg://user?id=${freshTicketInfo.user_telegram_id})`;
-  const newText = `✅ **Завершен**\n\nЗаявка #${freshTicketInfo.id} от пользователя ${userLink} была закрыта ${closedBy}.`;
+  const caption = `✅ **Завершен**\n\nЗаявка #${freshTicketInfo.id} от пользователя ${userLink} была закрыта ${closedBy}.`;
 
   try {
-    await ctx.telegram.editMessageText(
+    await ctx.telegram.deleteMessage(
       process.env.SUPPORT_CHAT_ID,
-      freshTicketInfo.support_chat_message_id,
-      null,
-      newText,
-      { parse_mode: "Markdown" }
+      freshTicketInfo.support_chat_message_id
+    );
+
+    await ctx.telegram.sendDocument(
+      process.env.SUPPORT_CHAT_ID,
+      {
+        source: buffer,
+        filename: `ticket_${ticketInfo.id}_history.txt`,
+      },
+      {
+        caption: caption,
+        parse_mode: "Markdown",
+      }
     );
   } catch (e) {
-    console.error("Не удалось отредактировать сообщение о заявке:", e);
+    console.error("Не удалось обновить сообщение о заявке:", e);
   }
 }
 
