@@ -1,13 +1,11 @@
 const fs = require("fs");
 const path = require("path");
-let sizeOf = require("image-size");
-
-// Защита от неправильного импорта (для совместимости с ES-модулями)
-if (typeof sizeOf !== "function" && sizeOf.default) {
-  sizeOf = sizeOf.default;
-}
+const sizeOf = require("image-size");
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+const MAX_DIMENSION = 10000;
+const MAX_DIMENSION_SUM = 10000;
+const MAX_ASPECT_RATIO = 20;
 
 function getImagePaths(subfolder) {
   const dir = path.join(__dirname, "../data/images", subfolder);
@@ -29,21 +27,35 @@ function getImagePaths(subfolder) {
       try {
         const stats = fs.statSync(filePath);
         if (stats.size > MAX_FILE_SIZE) {
-          return false;
-        }
-
-        const dimensions = sizeOf(filePath);
-        const { width, height } = dimensions;
-
-        if (width > 10000 || height > 10000 || width + height > 10000) {
           console.warn(
-            `[fileUtils] Пропущено изображение с неверными размерами: ${filePath}`
+            `[fileUtils] Пропущен файл из-за размера > 10MB: ${filePath}`
           );
           return false;
         }
-        if (width / height > 20 || height / width > 20) {
+
+        // Читаем файл в буфер
+        const buffer = fs.readFileSync(filePath);
+        const dimensions = sizeOf(buffer);
+        const { width, height } = dimensions;
+
+        if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
           console.warn(
-            `[fileUtils] Пропущено изображение с неверным соотношением сторон: ${filePath}`
+            `[fileUtils] Пропущено изображение с размером стороны > ${MAX_DIMENSION}px: ${filePath}`
+          );
+          return false;
+        }
+        if (width + height > MAX_DIMENSION_SUM) {
+          console.warn(
+            `[fileUtils] Пропущено изображение с суммой сторон > ${MAX_DIMENSION_SUM}px: ${filePath}`
+          );
+          return false;
+        }
+        if (
+          width / height > MAX_ASPECT_RATIO ||
+          height / width > MAX_ASPECT_RATIO
+        ) {
+          console.warn(
+            `[fileUtils] Пропущено изображение с соотношением сторон > ${MAX_ASPECT_RATIO}: ${filePath}`
           );
           return false;
         }
