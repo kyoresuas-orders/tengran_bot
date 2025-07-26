@@ -1,6 +1,11 @@
 const fs = require("fs");
 const path = require("path");
-const sizeOf = require("image-size");
+let sizeOf = require("image-size");
+
+// Защита от неправильного импорта (для совместимости с ES-модулями)
+if (typeof sizeOf !== "function" && sizeOf.default) {
+  sizeOf = sizeOf.default;
+}
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 
