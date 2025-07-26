@@ -1,6 +1,6 @@
 const fs = require("fs");
 const path = require("path");
-const sizeOf = require("image-size");
+const { imageSize: sizeOf } = require("image-size");
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 const MAX_DIMENSION = 10000;
