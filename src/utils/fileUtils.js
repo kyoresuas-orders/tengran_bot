@@ -3,12 +3,8 @@ const path = require("path");
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 
-function getCollectionImagePaths(collectionName) {
-  const dir = path.join(
-    __dirname,
-    "../data/images/collection",
-    collectionName.toLowerCase()
-  );
+function getImagePaths(subfolder) {
+  const dir = path.join(__dirname, "../data/images", subfolder);
   if (!fs.existsSync(dir)) {
     return [];
   }
@@ -25,4 +21,8 @@ function getCollectionImagePaths(collectionName) {
     .map((file) => path.join(dir, file));
 }
 
-module.exports = { getCollectionImagePaths };
+function getCollectionImagePaths(collectionName) {
+  return getImagePaths(path.join("collection", collectionName.toLowerCase()));
+}
+
+module.exports = { getCollectionImagePaths, getImagePaths };

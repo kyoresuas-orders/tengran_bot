@@ -9,6 +9,7 @@ const {
   loyaltyMenuKeyboard,
 } = require("../data/keyboards");
 const { renderView } = require("../utils/render");
+const { getImagePaths } = require("../utils/fileUtils");
 const { initiateSupportFlow } = require("../utils/supportFlow");
 
 const views = {
@@ -22,14 +23,7 @@ const views = {
   }),
   house_concept: (texts) => ({
     text: texts.callbacks.house_submenu.concept,
-    photos: [
-      "src/data/images/concept/1.jpg",
-      "src/data/images/concept/2.jpg",
-      "src/data/images/concept/3.jpg",
-      "src/data/images/concept/4.jpg",
-      "src/data/images/concept/5.jpg",
-      "src/data/images/concept/6.jpg",
-    ],
+    photos: getImagePaths("concept"),
     keyboard: backKeyboard,
   }),
   house_address: (texts) => ({
@@ -39,10 +33,7 @@ const views = {
   }),
   house_exhibition: (texts) => ({
     text: texts.callbacks.house_submenu.exhibition,
-    photos: [
-      "src/data/images/exhibition/1.jpeg",
-      "src/data/images/exhibition/2.jpeg",
-    ],
+    photos: getImagePaths("exhibition"),
     keyboard: backKeyboard,
   }),
   about: (texts) => ({
