@@ -13,6 +13,14 @@ function getImagePaths(subfolder) {
     .readdirSync(dir)
     .map((file) => path.join(dir, file))
     .filter((filePath) => {
+      const ext = path.extname(filePath).toLowerCase();
+      const isSupportedType =
+        ext === ".jpg" || ext === ".png" || ext === ".jpeg" || ext === ".webp";
+
+      if (!isSupportedType) {
+        return false;
+      }
+
       try {
         const stats = fs.statSync(filePath);
         if (stats.size > MAX_FILE_SIZE) {
@@ -35,16 +43,12 @@ function getImagePaths(subfolder) {
           return false;
         }
 
-        const ext = path.extname(filePath).toLowerCase();
-        const isSupportedType =
-          ext === ".jpg" ||
-          ext === ".png" ||
-          ext === ".jpeg" ||
-          ext === ".webp";
-
-        return isSupportedType;
+        return true;
       } catch (e) {
-        console.error(`[fileUtils] Не удалось обработать файл: ${filePath}`, e);
+        console.error(
+          `[fileUtils] Не удалось обработать файл изображения: ${filePath}`,
+          e
+        );
         return false;
       }
     });
