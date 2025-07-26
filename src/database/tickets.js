@@ -45,9 +45,16 @@ const saveMessage = async (ticketId, senderId, senderType, message) => {
   );
 };
 
+const setTicketSupportChatMessageId = async (ticketId, messageId) => {
+  await pool.execute(
+    "UPDATE `support_tickets` SET `support_chat_message_id` = ? WHERE `id` = ?",
+    [messageId, ticketId]
+  );
+};
+
 const getTicketById = async (ticketId) => {
   const [rows] = await pool.execute(
-    "SELECT t.*, u.telegram_id AS user_telegram_id FROM `support_tickets` t JOIN `users` u ON t.user_id = u.id WHERE t.id = ?",
+    "SELECT t.*, u.telegram_id AS user_telegram_id, u.first_name AS user_first_name FROM `support_tickets` t JOIN `users` u ON t.user_id = u.id WHERE t.id = ?",
     [ticketId]
   );
   return rows[0] || null;
@@ -70,4 +77,5 @@ module.exports = {
   saveMessage,
   getTicketById,
   getMessagesByTicketId,
+  setTicketSupportChatMessageId,
 };

@@ -1,0 +1,1 @@
+ALTER TABLE `support_tickets` DROP COLUMN `support_chat_message_id`;

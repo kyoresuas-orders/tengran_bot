@@ -1,5 +1,6 @@
 const {
   mainMenuKeyboard,
+  supportKeyboard,
   createAcceptTicketKeyboard,
 } = require("../data/keyboards");
 const { Markup } = require("telegraf");
@@ -11,6 +12,7 @@ const {
   closeTicket,
   getOpenTicketByManagerId,
   getTicketById,
+  setTicketSupportChatMessageId,
 } = require("../database/tickets");
 
 async function handleSupportMessage(ctx, texts) {
@@ -27,6 +29,7 @@ async function handleSupportMessage(ctx, texts) {
       if (messageText === "Завершить диалог") {
         await closeTicket(openTicketForManager.id);
         if (ticketInfo) {
+          await updateClosedTicketMessage(ctx, ticketInfo, "менеджером");
           await ctx.telegram.sendMessage(
             ticketInfo.user_telegram_id,
             "Менеджер завершил диалог. Если у вас остались вопросы, вы можете создать новую заявку.",
@@ -75,6 +78,11 @@ async function handleSupportMessage(ctx, texts) {
     } else if (openTicketForUser.status === "in_progress") {
       if (messageText === "Завершить диалог") {
         await closeTicket(openTicketForUser.id);
+        await updateClosedTicketMessage(
+          ctx,
+          openTicketForUser,
+          "пользователем"
+        );
         // Уведомляем менеджера и убираем у него клавиатуру
         await ctx.telegram.sendMessage(
           openTicketForUser.manager_id,
@@ -123,11 +131,13 @@ async function handleSupportMessage(ctx, texts) {
     const initialMessage = `❗️Новая заявка #${newTicketId} от пользователя ${userLink}.\n\n*Сообщение:* ${messageText}`;
     const keyboard = createAcceptTicketKeyboard(acceptLink);
 
-    await ctx.telegram.sendMessage(
+    const sentMessage = await ctx.telegram.sendMessage(
       process.env.SUPPORT_CHAT_ID,
       initialMessage,
       { ...keyboard, parse_mode: "Markdown" }
     );
+
+    await setTicketSupportChatMessageId(newTicketId, sentMessage.message_id);
 
     await ctx.reply(
       "Спасибо! Ваша заявка принята. Менеджер скоро подключится к диалогу."
@@ -136,6 +146,29 @@ async function handleSupportMessage(ctx, texts) {
   }
 
   return false; // Сообщение не относится к системе поддержки
+}
+
+async function updateClosedTicketMessage(ctx, ticketInfo, closedBy) {
+  if (!ticketInfo.support_chat_message_id) return;
+
+  // Получаем свежие данные, включая имя пользователя
+  const freshTicketInfo = await getTicketById(ticketInfo.id);
+  if (!freshTicketInfo) return;
+
+  const userLink = `[${freshTicketInfo.user_first_name}](tg://user?id=${freshTicketInfo.user_telegram_id})`;
+  const newText = `✅ **Завершен**\n\nЗаявка #${freshTicketInfo.id} от пользователя ${userLink} была закрыта ${closedBy}.`;
+
+  try {
+    await ctx.telegram.editMessageText(
+      process.env.SUPPORT_CHAT_ID,
+      freshTicketInfo.support_chat_message_id,
+      null,
+      newText,
+      { parse_mode: "Markdown" }
+    );
+  } catch (e) {
+    console.error("Не удалось отредактировать сообщение о заявке:", e);
+  }
 }
 
 module.exports = { handleSupportMessage };

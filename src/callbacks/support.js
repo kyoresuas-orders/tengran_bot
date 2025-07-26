@@ -4,7 +4,7 @@ const { getOpenTicketByUserId } = require("../database/tickets");
 
 module.exports = {
   name: "support",
-  async execute(ctx) {
+  async execute(ctx, texts) {
     const userFromDb = await findUserById(ctx.from.id);
     if (!userFromDb) {
       return ctx.answerCbQuery(
@@ -25,7 +25,7 @@ module.exports = {
     ctx.session.state = "awaiting_support_message";
 
     const message = await ctx.editMessageText(
-      ctx.texts.support.request,
+      texts.support_requests.menu,
       supportBackKeyboard
     );
 
