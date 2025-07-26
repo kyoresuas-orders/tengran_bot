@@ -49,6 +49,10 @@ const serviceBackKeyboard = Markup.inlineKeyboard([
   Markup.button.callback("<- Назад", "menu:service"),
 ]);
 
+const supportBackKeyboard = Markup.inlineKeyboard([
+  Markup.button.callback("<- Назад", "menu:back"),
+]);
+
 const loyaltyMenuKeyboard = Markup.inlineKeyboard([
   [
     Markup.button.callback(
@@ -112,4 +116,5 @@ module.exports = {
   collectionsMenuKeyboard,
   createCollectionKeyboard,
   supportKeyboard,
+  supportBackKeyboard,
 };

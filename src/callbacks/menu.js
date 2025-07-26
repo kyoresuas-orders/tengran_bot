@@ -92,6 +92,11 @@ module.exports = {
     const data = ctx.callbackQuery.data.split(":")[1];
 
     if (data === "back") {
+      if (ctx.session.awaitingSupportMessage) {
+        ctx.session.awaitingSupportMessage = false;
+        ctx.session.supportChatStarted = false;
+        ctx.session.supportMessageId = null;
+      }
       const lastViewName = ctx.session.history.pop() || "main";
       const view = views[lastViewName](texts);
       await renderView(ctx, view);
