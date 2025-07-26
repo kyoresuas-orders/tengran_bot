@@ -13,6 +13,7 @@ async function broadcastMessage(ctx, message) {
         await ctx.telegram.sendPhoto(user.telegram_id, photo.file_id, {
           caption: message.caption,
           parse_mode: "HTML",
+          disable_web_page_preview: true,
         });
       } else {
         await ctx.telegram.sendMessage(user.telegram_id, message.text, {

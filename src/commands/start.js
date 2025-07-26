@@ -8,10 +8,8 @@ module.exports = {
       const user = await findUserById(ctx.from.id);
 
       if (user) {
-        // Пользователь существует, показываем главное меню
         await ctx.reply(texts.commands.start.authorized, mainMenuKeyboard);
       } else {
-        // Пользователя нет, показываем кнопку согласия
         await ctx.reply(texts.commands.start.unauthorized, {
           ...agreementKeyboard,
           parse_mode: "HTML",

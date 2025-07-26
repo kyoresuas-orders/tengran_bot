@@ -140,7 +140,7 @@ module.exports = {
           }\n\nЦена: ${formatPrice(product.price)}`,
           photo: product.imageUrl,
           keyboard: createBestsellersKeyboard(page, bestsellerData.url),
-          options: { parse_mode: "HTML" },
+          options: { parse_mode: "HTML", disable_web_page_preview: true },
         };
         break;
       case "all":
@@ -175,7 +175,7 @@ module.exports = {
             text,
             photos: imagePaths,
             keyboard,
-            options: { parse_mode: "HTML" },
+            options: { parse_mode: "HTML", disable_web_page_preview: true },
           };
         }
         break;
@@ -194,6 +194,9 @@ module.exports = {
             [Markup.button.url("Рассмотреть сеты", "https://10gran.com/sets")],
             [Markup.button.callback("<- Назад", "jewelry:back")],
           ]),
+          options: {
+            disable_web_page_preview: true,
+          },
         };
         break;
       case "back":
