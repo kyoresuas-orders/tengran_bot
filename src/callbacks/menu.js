@@ -92,9 +92,8 @@ module.exports = {
     const data = ctx.callbackQuery.data.split(":")[1];
 
     if (data === "back") {
-      if (ctx.session.awaitingSupportMessage) {
-        ctx.session.awaitingSupportMessage = false;
-        ctx.session.supportChatStarted = false;
+      if (ctx.session.state === "awaiting_support_message") {
+        ctx.session.state = null;
         ctx.session.supportMessageId = null;
       }
       const lastViewName = ctx.session.history.pop() || "main";

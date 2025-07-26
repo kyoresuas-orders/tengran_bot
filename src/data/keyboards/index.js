@@ -101,6 +101,10 @@ const managerReturnKeyboard = Markup.inlineKeyboard([
   [Markup.button.callback("<- Назад", "menu:service")],
 ]);
 
+function createAcceptTicketKeyboard(url) {
+  return Markup.inlineKeyboard([Markup.button.url("▶️ Принять заявку", url)]);
+}
+
 module.exports = {
   agreementKeyboard,
   mainMenuKeyboard,
@@ -117,4 +121,5 @@ module.exports = {
   createCollectionKeyboard,
   supportKeyboard,
   supportBackKeyboard,
+  createAcceptTicketKeyboard,
 };
