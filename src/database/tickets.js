@@ -53,6 +53,14 @@ const getTicketById = async (ticketId) => {
   return rows[0] || null;
 };
 
+const getMessagesByTicketId = async (ticketId) => {
+  const [rows] = await pool.execute(
+    "SELECT * FROM `support_messages` WHERE `ticket_id` = ? ORDER BY `created_at` ASC",
+    [ticketId]
+  );
+  return rows;
+};
+
 module.exports = {
   createTicket,
   getOpenTicketByUserId,
@@ -61,4 +69,5 @@ module.exports = {
   closeTicket,
   saveMessage,
   getTicketById,
+  getMessagesByTicketId,
 };
