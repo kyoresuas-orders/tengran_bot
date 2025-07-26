@@ -23,6 +23,25 @@ async function handleSupportMessage(ctx, texts) {
     const openTicketForManager = await getOpenTicketByManagerId(fromId);
     if (openTicketForManager) {
       const ticketInfo = await getTicketById(openTicketForManager.id);
+
+      if (messageText === "Завершить диалог") {
+        await closeTicket(openTicketForManager.id);
+        if (ticketInfo) {
+          await ctx.telegram.sendMessage(
+            ticketInfo.user_telegram_id,
+            "Менеджер завершил диалог. Если у вас остались вопросы, вы можете создать новую заявку.",
+            Markup.removeKeyboard()
+          );
+          await ctx.telegram.sendMessage(
+            ticketInfo.user_telegram_id,
+            texts.commands.start.authorized,
+            mainMenuKeyboard
+          );
+        }
+        await ctx.reply("Диалог завершен.", Markup.removeKeyboard());
+        return true;
+      }
+
       if (ticketInfo) {
         await saveMessage(ticketInfo.id, fromId, "manager", messageText);
         await ctx.telegram.sendMessage(
@@ -56,10 +75,13 @@ async function handleSupportMessage(ctx, texts) {
     } else if (openTicketForUser.status === "in_progress") {
       if (messageText === "Завершить диалог") {
         await closeTicket(openTicketForUser.id);
+        // Уведомляем менеджера и убираем у него клавиатуру
         await ctx.telegram.sendMessage(
           openTicketForUser.manager_id,
-          `Пользователь ${ctx.from.first_name} завершил диалог.`
+          `Пользователь ${ctx.from.first_name} завершил диалог.`,
+          Markup.removeKeyboard()
         );
+        // Возвращаем пользователю главное меню
         await ctx.reply(
           "Диалог с поддержкой завершен.",
           Markup.removeKeyboard()
