@@ -11,7 +11,7 @@ const mainMenuKeyboard = Markup.inlineKeyboard([
   [Markup.button.callback("Размеры", "menu:sizes")],
   [Markup.button.callback("Сервис", "menu:service")],
   [Markup.button.callback("Узнать статус заказа", "menu:status")],
-  [Markup.button.url("Связаться с поддержкой", "https://t.me/info10gran")],
+  [Markup.button.callback("Связаться с поддержкой", "support:start")],
 ]);
 
 const houseMenuKeyboard = Markup.inlineKeyboard([
@@ -76,6 +76,10 @@ const collectionsMenuKeyboard = Markup.inlineKeyboard([
   [Markup.button.callback("<- Назад", "menu:jewelry")],
 ]);
 
+const supportKeyboard = Markup.keyboard([
+  [Markup.button.text("Завершить диалог")],
+]).resize();
+
 function createCollectionKeyboard(buttonText, url) {
   return Markup.inlineKeyboard([
     [Markup.button.url(buttonText, url)],
@@ -107,4 +111,5 @@ module.exports = {
   jewelryMenuKeyboard,
   collectionsMenuKeyboard,
   createCollectionKeyboard,
+  supportKeyboard,
 };
