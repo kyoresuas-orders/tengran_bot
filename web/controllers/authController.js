@@ -24,19 +24,8 @@ const logout = (req, res) => {
   });
 };
 
-const getMessengerPage = (req, res) => {
-  if (req.session.loggedin) {
-    res.send(
-      `<h1>Добро пожаловать в мессенджер</h1><a href="/logout">Выйти</a>`
-    );
-  } else {
-    res.redirect("/");
-  }
-};
-
 module.exports = {
   getLoginPage,
   login,
   logout,
-  getMessengerPage,
 };

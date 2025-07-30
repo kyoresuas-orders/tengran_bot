@@ -4,6 +4,7 @@ const express = require("express");
 const session = require("express-session");
 const bodyParser = require("body-parser");
 const authRoutes = require("./routes/authRoutes");
+const messengerRoutes = require("./routes/messengerRoutes");
 
 const app = express();
 const port = 3000;
@@ -23,6 +24,7 @@ app.use(
 );
 
 app.use("/", authRoutes);
+app.use("/", messengerRoutes);
 
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);

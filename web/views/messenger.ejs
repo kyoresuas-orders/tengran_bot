@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Мессенджер</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <div class="messenger-container">
+      <div class="sidebar">
+        <div class="sidebar-header">
+          <h2>Чаты</h2>
+        </div>
+        <div class="chat-list">
+          <% chats.forEach(chat => { %>
+          <a
+            href="/messenger/chat/<%= chat.user_id %>"
+            class="chat-item <% if(currentChatUser && currentChatUser.id === chat.user_id) { %>active<% } %>"
+          >
+            <div class="chat-info">
+              <div class="chat-name"><%= chat.user_first_name %></div>
+              <div class="last-message"><%= chat.last_message %></div>
+            </div>
+            <div class="chat-meta">
+              <% if (chat.last_message_time) { %>
+              <div class="last-message-time">
+                <%= new Date(chat.last_message_time).toLocaleTimeString('ru-RU',
+                { hour: '2-digit', minute: '2-digit' }) %>
+              </div>
+              <% } %>
+            </div>
+          </a>
+          <% }); %>
+        </div>
+      </div>
+      <div class="chat-window">
+        <% if (currentChatUser) { %>
+        <div class="chat-header">
+          <h3><%= currentChatUser.first_name %></h3>
+        </div>
+        <div class="message-list">
+          <% let lastTicketId = null; %> <% messages.forEach(message => { %> <%
+          if (message.ticket_id !== lastTicketId) { %>
+          <div class="ticket-separator">
+            <span>Тикет #<%= message.ticket_id %></span>
+          </div>
+          <% } %>
+          <div
+            class="message <%= message.sender_type === 'manager' ? 'sent' : 'received' %>"
+          >
+            <div class="message-bubble"><%= message.message %></div>
+          </div>
+          <% lastTicketId = message.ticket_id; %> <% }); %>
+        </div>
+        <div class="message-input">
+          <input type="text" placeholder="Введите сообщение..." />
+          <button>Отправить</button>
+        </div>
+        <% } else { %>
+        <div class="no-chat-selected">
+          <p>Выберите чат, чтобы начать общение</p>
+        </div>
+        <% } %>
+      </div>
+    </div>
+  </body>
+</html>

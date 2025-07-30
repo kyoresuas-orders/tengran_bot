@@ -65,9 +65,22 @@ const getAllUsers = async () => {
   }
 };
 
+const findUserByDbId = async (id) => {
+  try {
+    const [rows] = await pool.execute("SELECT * FROM `users` WHERE `id` = ?", [
+      id,
+    ]);
+    return rows[0] || null;
+  } catch (error) {
+    console.error("Ошибка в findUserByDbId:", error);
+    throw error;
+  }
+};
+
 module.exports = {
   findUserById,
   createUser,
   isAdmin,
   getAllUsers,
+  findUserByDbId,
 };

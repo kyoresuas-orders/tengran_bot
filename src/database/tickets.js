@@ -68,6 +68,31 @@ const getMessagesByTicketId = async (ticketId) => {
   return rows;
 };
 
+const getMessagesByUserId = async (userId) => {
+  const [rows] = await pool.execute(
+    "SELECT sm.*, st.id as ticket_id FROM support_messages sm JOIN support_tickets st ON sm.ticket_id = st.id WHERE st.user_id = ? ORDER BY sm.created_at ASC",
+    [userId]
+  );
+  return rows;
+};
+
+const getChats = async () => {
+  const [rows] = await pool.execute(`
+        SELECT
+            u.id AS user_id,
+            u.first_name AS user_first_name,
+            (SELECT sm.message FROM support_messages sm JOIN support_tickets st ON sm.ticket_id = st.id WHERE st.user_id = u.id ORDER BY sm.created_at DESC LIMIT 1) AS last_message,
+            (SELECT sm.created_at FROM support_messages sm JOIN support_tickets st ON sm.ticket_id = st.id WHERE st.user_id = u.id ORDER BY sm.created_at DESC LIMIT 1) AS last_message_time
+        FROM
+            users u
+        WHERE
+            EXISTS (SELECT 1 FROM support_tickets st WHERE st.user_id = u.id)
+        ORDER BY
+            last_message_time DESC
+    `);
+  return rows;
+};
+
 module.exports = {
   createTicket,
   getOpenTicketByUserId,
@@ -78,4 +103,6 @@ module.exports = {
   getTicketById,
   getMessagesByTicketId,
   setTicketSupportChatMessageId,
+  getChats,
+  getMessagesByUserId,
 };
