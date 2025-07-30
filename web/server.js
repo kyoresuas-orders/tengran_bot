@@ -49,8 +49,8 @@ const sessionParser = session({
 });
 
 app.use(express.static(path.join(__dirname, "public")));
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json()); // Для парсинга JSON-тела от бота
+app.use(bodyParser.json({ limit: "50mb" }));
+app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 app.use(sessionParser);
 
 app.post("/api/message", upload.array("attachment", 10), async (req, res) => {
