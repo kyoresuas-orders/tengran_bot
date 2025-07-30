@@ -5,6 +5,7 @@ const {
 } = require("../data/keyboards");
 const { Markup } = require("telegraf");
 const { findUserById, isAdmin } = require("../database/users");
+const axios = require("axios");
 const {
   createTicket,
   getOpenTicketByUserId,
@@ -36,36 +37,37 @@ async function handleSupportMessage(ctx, texts) {
   // Проверяем, есть ли уже открытый тикет
   const openTicketForUser = await getOpenTicketByUserId(userFromDb.id);
   if (openTicketForUser) {
-    if (openTicketForUser.status === "pending") {
-      await ctx.reply(
-        "Пожалуйста, дождитесь, пока менеджер примет вашу заявку."
+    // Логика закрытия тикета, если он в процессе
+    if (
+      openTicketForUser.status === "in_progress" &&
+      messageText === "Завершить диалог"
+    ) {
+      await closeTicket(openTicketForUser.id);
+      await updateClosedTicketMessage(ctx, openTicketForUser, "пользователем");
+      // Уведомляем менеджера и убираем у него клавиатуру
+      await ctx.telegram.sendMessage(
+        openTicketForUser.manager_id,
+        `Пользователь ${ctx.from.first_name} завершил диалог.`,
+        Markup.removeKeyboard()
       );
-    } else if (openTicketForUser.status === "in_progress") {
-      if (messageText === "Завершить диалог") {
-        await closeTicket(openTicketForUser.id);
-        await updateClosedTicketMessage(
-          ctx,
-          openTicketForUser,
-          "пользователем"
-        );
-        // Уведомляем менеджера и убираем у него клавиатуру
-        await ctx.telegram.sendMessage(
-          openTicketForUser.manager_id,
-          `Пользователь ${ctx.from.first_name} завершил диалог.`,
-          Markup.removeKeyboard()
-        );
-        // Возвращаем пользователю главное меню
-        await ctx.reply(
-          "Диалог с поддержкой завершен.",
-          Markup.removeKeyboard()
-        );
-        await ctx.reply(texts.commands.start.authorized, mainMenuKeyboard);
-      } else {
-        await saveMessage(openTicketForUser.id, fromId, "user", messageText);
-        await ctx.telegram.sendMessage(
-          openTicketForUser.manager_id,
-          messageText
-        );
+      // Возвращаем пользователю главное меню
+      await ctx.reply("Диалог с поддержкой завершен.", Markup.removeKeyboard());
+      await ctx.reply(texts.commands.start.authorized, mainMenuKeyboard);
+
+      // Для всех остальных сообщений в открытом или ожидающем тикете
+    } else if (
+      openTicketForUser.status === "pending" ||
+      openTicketForUser.status === "in_progress"
+    ) {
+      await saveMessage(openTicketForUser.id, fromId, "user", messageText);
+      // Отправляем сообщение на веб-сервер
+      try {
+        await axios.post(`${process.env.WEB_APP_URL}/api/message-from-bot`, {
+          userId: userFromDb.id,
+          message: messageText,
+        });
+      } catch (error) {
+        console.error("Failed to send message to web server", error.message);
       }
     }
     return true; // Сообщение обработано

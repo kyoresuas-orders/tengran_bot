@@ -54,8 +54,14 @@
           <% lastTicketId = message.ticket_id; %> <% }); %>
         </div>
         <div class="message-input">
-          <input type="text" placeholder="Введите сообщение..." />
-          <button>Отправить</button>
+          <form id="message-form">
+            <input
+              type="text"
+              id="message-input-field"
+              placeholder="Введите сообщение..."
+            />
+            <button type="submit">Отправить</button>
+          </form>
         </div>
         <% } else { %>
         <div class="no-chat-selected">
@@ -64,5 +70,69 @@
         <% } %>
       </div>
     </div>
+
+    <% if (currentChatUser) { %>
+    <script>
+      const messageList = document.querySelector(".message-list");
+      const messageForm = document.querySelector("#message-form");
+      const messageInputField = document.querySelector("#message-input-field");
+      const userId = "<%= currentChatUser.id %>";
+      const wsProtocol = window.location.protocol === "https:" ? "wss" : "ws";
+      const ws = new WebSocket(`${wsProtocol}://${window.location.host}`);
+
+      ws.onopen = () => {
+        console.log("WebSocket connection established");
+        // Register this client with its user ID
+        ws.send(
+          JSON.stringify({
+            type: "register",
+            payload: { userId: userId },
+          })
+        );
+      };
+
+      ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+
+        if (
+          data.type === "newMessage" &&
+          data.payload.userId.toString() === userId
+        ) {
+          appendMessage(data.payload.message, "received");
+        }
+      };
+
+      messageForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const message = messageInputField.value;
+        if (!message) return;
+
+        const data = {
+          type: "sendMessage",
+          payload: {
+            userId: userId,
+            message: message,
+          },
+        };
+
+        ws.send(JSON.stringify(data));
+        appendMessage(message, "sent");
+        messageInputField.value = "";
+      });
+
+      function appendMessage(text, type) {
+        const messageDiv = document.createElement("div");
+        messageDiv.classList.add("message", type);
+
+        const bubbleDiv = document.createElement("div");
+        bubbleDiv.classList.add("message-bubble");
+        bubbleDiv.textContent = text;
+
+        messageDiv.appendChild(bubbleDiv);
+        messageList.appendChild(messageDiv);
+        messageList.scrollTop = messageList.scrollHeight;
+      }
+    </script>
+    <% } %>
   </body>
 </html>
