@@ -21,43 +21,6 @@ async function handleSupportMessage(ctx, texts) {
   const fromId = ctx.from.id;
   const messageText = ctx.message.text;
 
-  // 1. Логика для менеджера
-  const isManager = await isAdmin(fromId);
-  if (isManager) {
-    const openTicketForManager = await getOpenTicketByManagerId(fromId);
-    if (openTicketForManager) {
-      const ticketInfo = await getTicketById(openTicketForManager.id);
-
-      if (messageText === "Завершить диалог") {
-        await closeTicket(openTicketForManager.id);
-        if (ticketInfo) {
-          await updateClosedTicketMessage(ctx, ticketInfo, "менеджером");
-          await ctx.telegram.sendMessage(
-            ticketInfo.user_telegram_id,
-            "Менеджер завершил диалог. Если у вас остались вопросы, вы можете создать новую заявку.",
-            Markup.removeKeyboard()
-          );
-          await ctx.telegram.sendMessage(
-            ticketInfo.user_telegram_id,
-            texts.commands.start.authorized,
-            mainMenuKeyboard
-          );
-        }
-        await ctx.reply("Диалог завершен.", Markup.removeKeyboard());
-        return true;
-      }
-
-      if (ticketInfo) {
-        await saveMessage(ticketInfo.id, fromId, "manager", messageText);
-        await ctx.telegram.sendMessage(
-          ticketInfo.user_telegram_id,
-          messageText
-        );
-      }
-      return true; // Сообщение обработано
-    }
-  }
-
   // 2. Логика для пользователя
   const userFromDb = await findUserById(fromId);
   if (!userFromDb) {
@@ -127,11 +90,14 @@ async function handleSupportMessage(ctx, texts) {
       }
     }
 
-    const botInfo = await ctx.telegram.getMe();
-    const acceptLink = `https://t.me/${botInfo.username}?start=accept_ticket_${newTicketId}`;
+    // Новое уведомление со ссылкой на сайт
     const userLink = `[${ctx.from.first_name}](tg://user?id=${fromId})`;
+    const webchatLink = `${process.env.WEB_APP_URL}/messenger/chat/${userFromDb.id}`;
     const initialMessage = `❗️Новая заявка #${newTicketId} от пользователя ${userLink}.\n\n*Сообщение:* ${messageText}`;
-    const keyboard = createAcceptTicketKeyboard(acceptLink);
+
+    const keyboard = Markup.inlineKeyboard([
+      Markup.button.url("Перейти к чату", webchatLink),
+    ]);
 
     const sentMessage = await ctx.telegram.sendMessage(
       process.env.SUPPORT_CHAT_ID,
@@ -142,7 +108,7 @@ async function handleSupportMessage(ctx, texts) {
     await setTicketSupportChatMessageId(newTicketId, sentMessage.message_id);
 
     await ctx.reply(
-      "Спасибо! Ваша заявка принята. Менеджер скоро подключится к диалогу."
+      "Спасибо! Ваша заявка принята. Менеджер скоро ответит вам в чате."
     );
     return true; // Сообщение обработано
   }
