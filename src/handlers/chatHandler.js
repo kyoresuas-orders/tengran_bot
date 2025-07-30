@@ -122,12 +122,19 @@ async function handleSupportMessage(ctx, texts) {
           attachmentType
         );
 
-        await axios.post(`${localApiUrl}/api/message-from-bot`, {
-          userId: userFromDb.id,
-          message: caption,
-          attachmentUrl,
-          attachmentType,
-        });
+        try {
+          await axios.post(`${localApiUrl}/api/message-from-bot`, {
+            userId: userFromDb.id,
+            message: caption,
+            attachmentUrl,
+            attachmentType,
+          });
+        } catch (error) {
+          console.error(
+            "Failed to notify web server about new message",
+            error.message
+          );
+        }
       } else if (messageText) {
         // Handle text messages
         await saveMessage(
@@ -139,10 +146,17 @@ async function handleSupportMessage(ctx, texts) {
           null
         );
 
-        await axios.post(`${localApiUrl}/api/message-from-bot`, {
-          userId: userFromDb.id,
-          message: messageText,
-        });
+        try {
+          await axios.post(`${localApiUrl}/api/message-from-bot`, {
+            userId: userFromDb.id,
+            message: messageText,
+          });
+        } catch (error) {
+          console.error(
+            "Failed to notify web server about new message",
+            error.message
+          );
+        }
       }
     }
     return true; // Сообщение обработано
