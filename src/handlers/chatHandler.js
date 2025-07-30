@@ -12,10 +12,14 @@ const {
   getMessagesByTicketId,
 } = require("../database/tickets");
 const { Buffer } = require("buffer");
+const fs = require("fs");
+const path = require("path");
 
 async function handleSupportMessage(ctx, texts) {
   const fromId = ctx.from.id;
   const messageText = ctx.message.text;
+  const messagePhoto = ctx.message.photo;
+  const messageVideo = ctx.message.video;
 
   // 2. Логика для пользователя
   const userFromDb = await findUserById(fromId);
@@ -84,12 +88,52 @@ async function handleSupportMessage(ctx, texts) {
       openTicketForUser.status === "pending" ||
       openTicketForUser.status === "in_progress"
     ) {
-      await saveMessage(openTicketForUser.id, fromId, "user", messageText);
+      let attachmentUrl = null;
+      let attachmentType = null;
+      let messageToSend = messageText;
+
+      if (messagePhoto || messageVideo) {
+        const file = messagePhoto
+          ? messagePhoto[messagePhoto.length - 1]
+          : messageVideo;
+        const fileLink = await ctx.telegram.getFileLink(file.file_id);
+        const response = await axios({
+          url: fileLink.href,
+          responseType: "arraybuffer",
+        });
+        const fileBuffer = Buffer.from(response.data, "binary");
+        const fileExtension = path.extname(fileLink.pathname);
+        const fileName = `${file.file_unique_id}${fileExtension}`;
+        const filePath = path.join(
+          process.cwd(),
+          "web",
+          "public",
+          "uploads",
+          fileName
+        );
+
+        fs.writeFileSync(filePath, fileBuffer);
+
+        attachmentUrl = `/uploads/${fileName}`;
+        attachmentType = messagePhoto ? "photo" : "video";
+        messageToSend = ctx.message.caption || null;
+      }
+
+      await saveMessage(
+        openTicketForUser.id,
+        fromId,
+        "user",
+        messageToSend,
+        attachmentUrl,
+        attachmentType
+      );
       // Отправляем сообщение на веб-сервер
       try {
         await axios.post(`${process.env.WEB_APP_URL}/api/message-from-bot`, {
           userId: userFromDb.id,
-          message: messageText,
+          message: messageToSend,
+          attachmentUrl,
+          attachmentType,
         });
       } catch (error) {
         console.error("Failed to send message to web server", error.message);

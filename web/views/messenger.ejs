@@ -59,16 +59,58 @@
           <div
             class="message <%= message.sender_type === 'manager' ? 'sent' : 'received' %>"
           >
-            <div class="message-bubble"><%= message.message %></div>
+            <div class="message-bubble">
+              <% if (message.attachment_url) { %> <% if (message.attachment_type
+              === 'photo') { %>
+              <img
+                src="<%= message.attachment_url %>"
+                alt="Attachment"
+                style="max-width: 200px; border-radius: 8px"
+              />
+              <% } else if (message.attachment_type === 'video') { %>
+              <video
+                src="<%= message.attachment_url %>"
+                controls
+                style="max-width: 200px; border-radius: 8px"
+              ></video>
+              <% } %> <% } %> <% if (message.message) { %>
+              <p><%= message.message %></p>
+              <% } %>
+            </div>
           </div>
           <% lastTicketId = message.ticket_id; %> <% }); %>
         </div>
+        <div id="attachment-preview-container"></div>
         <div class="message-input">
-          <form id="message-form">
+          <form id="message-form" enctype="multipart/form-data">
+            <input
+              type="file"
+              id="attachment-input"
+              name="attachment"
+              style="display: none"
+              multiple
+            />
+            <label for="attachment-input" class="attachment-btn">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                width="24"
+                height="24"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M18.97 3.646a.75.75 0 01.293 1.015l-1.55 3.101a.75.75 0 01-1.072.33l-5.02-2.51a.75.75 0 010-1.342l5.02-2.51a.75.75 0 011.365.672zM3 10.5a.75.75 0 01.75-.75h10.5a.75.75 0 010 1.5H3.75A.75.75 0 013 10.5zM3 6a.75.75 0 01.75-.75h10.5a.75.75 0 010 1.5H3.75A.75.75 0 013 6zM3.75 15a.75.75 0 000 1.5h16.5a.75.75 0 000-1.5H3.75z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+            </label>
             <input
               type="text"
               id="message-input-field"
+              name="message"
               placeholder="Введите сообщение..."
+              autocomplete="off"
             />
             <button type="submit">
               <svg
@@ -111,7 +153,7 @@
           data.type === "newMessage" &&
           data.payload.userId.toString() === userId
         ) {
-          appendMessage(data.payload.message, "received");
+          appendMessage(data.payload);
         }
 
         if (
@@ -148,31 +190,129 @@
         }
       };
 
-      messageForm.addEventListener("submit", (e) => {
-        e.preventDefault();
-        const message = messageInputField.value;
-        if (!message) return;
+      const attachmentInput = document.getElementById("attachment-input");
+      const attachmentPreviewContainer = document.getElementById(
+        "attachment-preview-container"
+      );
+      const sendButton = messageForm.querySelector("button[type='submit']");
+      const sendButtonIcon = sendButton.innerHTML;
 
-        const data = {
-          type: "sendMessage",
-          payload: {
-            userId: userId,
-            message: message,
-          },
-        };
+      let attachedFiles = [];
 
-        ws.send(JSON.stringify(data));
-        appendMessage(message, "sent");
-        messageInputField.value = "";
+      function updateFileList() {
+        attachmentPreviewContainer.innerHTML = "";
+        if (attachedFiles.length > 0) {
+          attachedFiles.forEach((file, index) => {
+            const fileElement = document.createElement("div");
+            fileElement.classList.add("file-preview-item");
+            const fileName = document.createElement("span");
+            fileName.textContent = file.name;
+            const removeBtn = document.createElement("button");
+            removeBtn.classList.add("remove-file-btn");
+            removeBtn.innerHTML = "&times;";
+            removeBtn.type = "button";
+            removeBtn.onclick = () => {
+              attachedFiles.splice(index, 1);
+              updateFileList();
+            };
+            fileElement.appendChild(fileName);
+            fileElement.appendChild(removeBtn);
+            attachmentPreviewContainer.appendChild(fileElement);
+          });
+        }
+      }
+
+      attachmentInput.addEventListener("change", () => {
+        attachedFiles.push(...Array.from(attachmentInput.files));
+        updateFileList();
+        attachmentInput.value = ""; // Clear the input
       });
 
-      function appendMessage(text, type) {
+      messageInputField.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          messageForm.requestSubmit();
+        }
+      });
+
+      messageForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const message = messageInputField.value.trim();
+        if (!message && attachedFiles.length === 0) {
+          return;
+        }
+
+        const formData = new FormData();
+        formData.append("userId", userId);
+        formData.append("message", message);
+        attachedFiles.forEach((file) => {
+          formData.append("attachment", file);
+        });
+
+        // Show loader
+        sendButton.innerHTML =
+          '<div class="loader-wrapper"><div class="loader"></div></div>';
+        sendButton.disabled = true;
+
+        try {
+          const response = await fetch("/api/message", {
+            method: "POST",
+            body: formData,
+          });
+
+          if (response.ok) {
+            messageInputField.value = "";
+            attachedFiles = [];
+            updateFileList();
+          } else {
+            const errorData = await response.json();
+            alert(`Ошибка отправки: ${errorData.error}`);
+          }
+        } catch (error) {
+          console.error("Ошибка при отправке сообщения:", error);
+          alert("Произошла ошибка сети. Попробуйте еще раз.");
+        } finally {
+          // Hide loader
+          sendButton.innerHTML = sendButtonIcon;
+          sendButton.disabled = false;
+        }
+      });
+
+      function appendMessage(payload) {
+        const { message, attachmentUrl, attachmentType, sender_type } = payload;
+
         const messageDiv = document.createElement("div");
-        messageDiv.classList.add("message", type);
+        messageDiv.classList.add(
+          "message",
+          sender_type === "manager" ? "sent" : "received"
+        );
 
         const bubbleDiv = document.createElement("div");
         bubbleDiv.classList.add("message-bubble");
-        bubbleDiv.textContent = text;
+
+        if (attachmentUrl) {
+          if (attachmentType === "photo") {
+            const img = document.createElement("img");
+            img.src = attachmentUrl;
+            img.style.maxWidth = "200px";
+            img.style.borderRadius = "8px";
+            bubbleDiv.appendChild(img);
+          } else if (attachmentType === "video") {
+            const video = document.createElement("video");
+            video.src = attachmentUrl;
+            video.controls = true;
+            video.style.maxWidth = "200px";
+            video.style.borderRadius = "8px";
+            bubbleDiv.appendChild(video);
+          }
+        }
+
+        if (message) {
+          const p = document.createElement("p");
+          p.textContent = message;
+          bubbleDiv.appendChild(p);
+        }
 
         messageDiv.appendChild(bubbleDiv);
         messageList.appendChild(messageDiv);

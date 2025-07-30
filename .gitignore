@@ -9,3 +9,6 @@ sessions.json
 
 # MacOS
 .DS_Store
+
+# uploads
+uploads/

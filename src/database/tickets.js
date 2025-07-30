@@ -38,10 +38,17 @@ const closeTicket = async (ticketId) => {
   );
 };
 
-const saveMessage = async (ticketId, senderId, senderType, message) => {
+const saveMessage = async (
+  ticketId,
+  senderId,
+  senderType,
+  message,
+  attachmentUrl = null,
+  attachmentType = null
+) => {
   await pool.execute(
-    "INSERT INTO `support_messages` (`ticket_id`, `sender_id`, `sender_type`, `message`) VALUES (?, ?, ?, ?)",
-    [ticketId, senderId, senderType, message]
+    "INSERT INTO `support_messages` (`ticket_id`, `sender_id`, `sender_type`, `message`, `attachment_url`, `attachment_type`) VALUES (?, ?, ?, ?, ?, ?)",
+    [ticketId, senderId, senderType, message, attachmentUrl, attachmentType]
   );
 };
 

@@ -23,6 +23,7 @@
     "express": "^5.1.0",
     "express-session": "^1.18.2",
     "image-size": "^2.0.2",
+    "multer": "^2.0.2",
     "mysql2": "^3.14.1",
     "telegraf": "^4.16.3",
     "telegraf-session-local": "^2.1.1",

@@ -14,7 +14,12 @@ const bot = new Telegraf(process.env.BOT_TOKEN);
 const getMessengerPage = async (req, res) => {
   try {
     const chats = await getChats();
-    res.render("messenger", { chats, currentChatUser: null, messages: [] });
+    res.render("messenger", {
+      chats,
+      currentChatUser: null,
+      messages: [],
+      selectedUserId: null,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).send("Internal Server Error");
@@ -33,6 +38,7 @@ const getChat = async (req, res) => {
       chats,
       messages,
       currentChatUser,
+      selectedUserId: userId,
       ticketIsOpen: !!currentTicket,
     });
   } catch (error) {
