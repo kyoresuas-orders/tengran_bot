@@ -139,6 +139,10 @@
       const messageForm = document.querySelector("#message-form");
       const messageInputField = document.querySelector("#message-input-field");
       const userId = "<%= currentChatUser.id %>";
+
+      // Scroll to bottom on initial load
+      messageList.scrollTop = messageList.scrollHeight;
+
       const wsProtocol = window.location.protocol === "https:" ? "wss" : "ws";
       const ws = new WebSocket(`${wsProtocol}://${window.location.host}`);
 
@@ -238,85 +242,154 @@
       messageForm.addEventListener("submit", async (e) => {
         e.preventDefault();
 
-        const message = messageInputField.value.trim();
-        if (!message && attachedFiles.length === 0) {
+        const messageText = messageInputField.value.trim();
+        if (!messageText && attachedFiles.length === 0) {
           return;
         }
 
+        // --- Optimistic UI Update ---
+        const tempId = `temp_${Date.now()}`;
+        appendMessage({
+          message: messageText,
+          files: attachedFiles, // Pass the full File objects for preview
+          sender_type: "manager",
+          isLoading: true,
+          tempId: tempId,
+        });
+
+        const filesForUpload = [...attachedFiles];
+
+        // Clear inputs immediately
+        messageInputField.value = "";
+        attachedFiles = [];
+        updateFileList();
+
+        // --- Actual Form Submission ---
         const formData = new FormData();
         formData.append("userId", userId);
-        formData.append("message", message);
-        attachedFiles.forEach((file) => {
+        formData.append("message", messageText);
+        formData.append("tempId", tempId);
+        filesForUpload.forEach((file) => {
           formData.append("attachment", file);
         });
 
-        // Show loader
-        sendButton.innerHTML =
-          '<div class="loader-wrapper"><div class="loader"></div></div>';
-        sendButton.disabled = true;
-
         try {
-          const response = await fetch("/api/message", {
+          // No need to process the response here for optimistic UI
+          await fetch("/api/message", {
             method: "POST",
             body: formData,
           });
-
-          if (response.ok) {
-            messageInputField.value = "";
-            attachedFiles = [];
-            updateFileList();
-          } else {
-            const errorData = await response.json();
-            alert(`Ошибка отправки: ${errorData.error}`);
-          }
+          // The server will broadcast the message back via WebSocket
         } catch (error) {
           console.error("Ошибка при отправке сообщения:", error);
           alert("Произошла ошибка сети. Попробуйте еще раз.");
-        } finally {
-          // Hide loader
-          sendButton.innerHTML = sendButtonIcon;
-          sendButton.disabled = false;
+          const tempMessage = document.getElementById(tempId);
+          if (tempMessage) tempMessage.style.opacity = "0.5";
         }
       });
 
       function appendMessage(payload) {
-        const { message, attachmentUrl, attachmentType, sender_type } = payload;
+        // If it's a confirmation for an optimistic message, replace it
+        if (payload.tempId && document.getElementById(payload.tempId)) {
+          const tempMessage = document.getElementById(payload.tempId);
+          const newContent = createMessageElement(payload);
+          tempMessage.replaceWith(newContent);
+          messageList.scrollTop = messageList.scrollHeight;
+          return;
+        }
+
+        // If it's a new message from another user/manager, just append it
+        const messageElement = createMessageElement(payload);
+        messageList.appendChild(messageElement);
+        messageList.scrollTop = messageList.scrollHeight;
+      }
+
+      function createMessageElement(payload) {
+        const {
+          message,
+          files,
+          attachmentUrl,
+          attachmentType,
+          sender_type,
+          isLoading,
+          tempId,
+        } = payload;
 
         const messageDiv = document.createElement("div");
         messageDiv.classList.add(
           "message",
           sender_type === "manager" ? "sent" : "received"
         );
+        if (tempId) {
+          messageDiv.id = tempId;
+        }
 
         const bubbleDiv = document.createElement("div");
         bubbleDiv.classList.add("message-bubble");
+        if (isLoading) {
+          bubbleDiv.classList.add("is-loading");
+        }
 
+        const contentDiv = document.createElement("div");
+        contentDiv.className = "message-content";
+
+        // Attachment rendering
         if (attachmentUrl) {
+          // Real attachment from server
           if (attachmentType === "photo") {
             const img = document.createElement("img");
             img.src = attachmentUrl;
             img.style.maxWidth = "200px";
             img.style.borderRadius = "8px";
-            bubbleDiv.appendChild(img);
+            contentDiv.appendChild(img);
           } else if (attachmentType === "video") {
             const video = document.createElement("video");
             video.src = attachmentUrl;
             video.controls = true;
             video.style.maxWidth = "200px";
             video.style.borderRadius = "8px";
-            bubbleDiv.appendChild(video);
+            contentDiv.appendChild(video);
           }
+        } else if (files && files.length > 0) {
+          // Optimistic file preview
+          files.forEach((file) => {
+            const contentWrapper = document.createElement("div");
+            contentWrapper.style.position = "relative";
+
+            if (file.type && file.type.startsWith("image/")) {
+              const img = document.createElement("img");
+              img.src = URL.createObjectURL(file);
+              img.style.maxWidth = "200px";
+              img.style.borderRadius = "8px";
+              img.onload = () => URL.revokeObjectURL(img.src); // Free memory once loaded
+              contentWrapper.appendChild(img);
+            } else {
+              const p = document.createElement("p");
+              p.textContent = `[${file.name}]`;
+              contentWrapper.appendChild(p);
+            }
+            contentDiv.appendChild(contentWrapper);
+          });
         }
 
+        // Text rendering
         if (message) {
           const p = document.createElement("p");
           p.textContent = message;
-          bubbleDiv.appendChild(p);
+          contentDiv.appendChild(p);
+        }
+
+        bubbleDiv.appendChild(contentDiv);
+
+        // Loader rendering
+        if (isLoading) {
+          const loader = document.createElement("div");
+          loader.className = "message-loader";
+          bubbleDiv.appendChild(loader);
         }
 
         messageDiv.appendChild(bubbleDiv);
-        messageList.appendChild(messageDiv);
-        messageList.scrollTop = messageList.scrollHeight;
+        return messageDiv;
       }
     </script>
     <% } %>

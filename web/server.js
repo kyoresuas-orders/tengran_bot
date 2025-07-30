@@ -57,7 +57,7 @@ app.post("/api/message", upload.array("attachment", 10), async (req, res) => {
   if (!req.session.loggedin) {
     return res.status(401).json({ error: "Unauthorized" });
   }
-  const { userId, message } = req.body;
+  const { userId, message, tempId } = req.body;
   const user = await findUserByDbId(userId);
 
   if (!user) {
@@ -121,6 +121,7 @@ app.post("/api/message", upload.array("attachment", 10), async (req, res) => {
                   attachmentUrl,
                   attachmentType,
                   sender_type: "manager",
+                  tempId: attachments.indexOf(attachment) === 0 ? tempId : null,
                 },
               })
             );
@@ -154,6 +155,7 @@ app.post("/api/message", upload.array("attachment", 10), async (req, res) => {
                 attachmentUrl: null,
                 attachmentType: null,
                 sender_type: "manager",
+                tempId: tempId,
               },
             })
           );
