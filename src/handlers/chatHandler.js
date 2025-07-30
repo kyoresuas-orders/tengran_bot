@@ -15,6 +15,8 @@ const { Buffer } = require("buffer");
 const fs = require("fs");
 const path = require("path");
 
+const localApiUrl = "http://localhost:3000";
+
 async function handleSupportMessage(ctx, texts) {
   const fromId = ctx.from.id;
   const messageText = ctx.message.text;
@@ -41,12 +43,9 @@ async function handleSupportMessage(ctx, texts) {
 
       // Notify web clients that ticket is closed
       try {
-        await axios.post(
-          `${process.env.WEB_APP_URL}/api/ticket-closed-by-user`,
-          {
-            userId: userFromDb.id,
-          }
-        );
+        await axios.post(`${localApiUrl}/api/ticket-closed-by-user`, {
+          userId: userFromDb.id,
+        });
       } catch (error) {
         console.error(
           "Failed to send ticket-closed notification to web server",
@@ -123,7 +122,7 @@ async function handleSupportMessage(ctx, texts) {
           attachmentType
         );
 
-        await axios.post(`${process.env.WEB_APP_URL}/api/message-from-bot`, {
+        await axios.post(`${localApiUrl}/api/message-from-bot`, {
           userId: userFromDb.id,
           message: caption,
           attachmentUrl,
@@ -140,7 +139,7 @@ async function handleSupportMessage(ctx, texts) {
           null
         );
 
-        await axios.post(`${process.env.WEB_APP_URL}/api/message-from-bot`, {
+        await axios.post(`${localApiUrl}/api/message-from-bot`, {
           userId: userFromDb.id,
           message: messageText,
         });
