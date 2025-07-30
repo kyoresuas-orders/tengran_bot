@@ -1,19 +1,18 @@
 const { handleSupportMessage } = require("./chatHandler");
 
 function registerHandlers(bot, texts) {
-  bot.on("text", async (ctx) => {
-    // Пропускаем обработку, если это команда /start
-    if (ctx.message.text.startsWith("/start")) {
-      return;
-    }
+  bot.on("message", async (ctx, next) => {
+    try {
+      const isSupportMessage = await handleSupportMessage(ctx, texts);
 
-    // Пытаемся обработать сообщение как часть системы поддержки
-    const isSupportMessage = await handleSupportMessage(ctx, texts);
-
-    // Если сообщение не было обработано системой поддержки,
-    // отвечаем, что команда неизвестна.
-    if (!isSupportMessage) {
-      ctx.replyWithHTML(texts.errors.unknown_command);
+      if (!isSupportMessage) {
+        return next();
+      }
+    } catch (error) {
+      console.error("Error in message handler:", error);
+      await ctx.reply(
+        "Произошла непредвиденная ошибка. Пожалуйста, попробуйте еще раз."
+      );
     }
   });
 }

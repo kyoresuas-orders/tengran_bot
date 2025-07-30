@@ -88,10 +88,7 @@ async function handleSupportMessage(ctx, texts) {
       openTicketForUser.status === "pending" ||
       openTicketForUser.status === "in_progress"
     ) {
-      let attachmentUrl = null;
-      let attachmentType = null;
-      let messageToSend = messageText;
-
+      // Handle file messages
       if (messagePhoto || messageVideo) {
         const file = messagePhoto
           ? messagePhoto[messagePhoto.length - 1]
@@ -111,32 +108,42 @@ async function handleSupportMessage(ctx, texts) {
           "uploads",
           fileName
         );
-
         fs.writeFileSync(filePath, fileBuffer);
 
-        attachmentUrl = `/uploads/${fileName}`;
-        attachmentType = messagePhoto ? "photo" : "video";
-        messageToSend = ctx.message.caption || null;
-      }
+        const attachmentUrl = `/uploads/${fileName}`;
+        const attachmentType = messagePhoto ? "photo" : "video";
+        const caption = ctx.message.caption || null;
 
-      await saveMessage(
-        openTicketForUser.id,
-        fromId,
-        "user",
-        messageToSend,
-        attachmentUrl,
-        attachmentType
-      );
-      // Отправляем сообщение на веб-сервер
-      try {
+        await saveMessage(
+          openTicketForUser.id,
+          fromId,
+          "user",
+          caption,
+          attachmentUrl,
+          attachmentType
+        );
+
         await axios.post(`${process.env.WEB_APP_URL}/api/message-from-bot`, {
           userId: userFromDb.id,
-          message: messageToSend,
+          message: caption,
           attachmentUrl,
           attachmentType,
         });
-      } catch (error) {
-        console.error("Failed to send message to web server", error.message);
+      } else if (messageText) {
+        // Handle text messages
+        await saveMessage(
+          openTicketForUser.id,
+          fromId,
+          "user",
+          messageText,
+          null,
+          null
+        );
+
+        await axios.post(`${process.env.WEB_APP_URL}/api/message-from-bot`, {
+          userId: userFromDb.id,
+          message: messageText,
+        });
       }
     }
     return true; // Сообщение обработано
@@ -147,7 +154,46 @@ async function handleSupportMessage(ctx, texts) {
     ctx.session.state = null; // Сбрасываем состояние
 
     const newTicketId = await createTicket(userFromDb.id);
-    await saveMessage(newTicketId, fromId, "user", messageText);
+
+    let attachmentUrl = null;
+    let attachmentType = null;
+    let messageToSave = messageText;
+
+    if (messagePhoto || messageVideo) {
+      const file = messagePhoto
+        ? messagePhoto[messagePhoto.length - 1]
+        : messageVideo;
+      const fileLink = await ctx.telegram.getFileLink(file.file_id);
+      const response = await axios({
+        url: fileLink.href,
+        responseType: "arraybuffer",
+      });
+      const fileBuffer = Buffer.from(response.data, "binary");
+      const fileExtension = path.extname(fileLink.pathname);
+      const fileName = `${file.file_unique_id}${fileExtension}`;
+      const filePath = path.join(
+        process.cwd(),
+        "web",
+        "public",
+        "uploads",
+        fileName
+      );
+
+      fs.writeFileSync(filePath, fileBuffer);
+
+      attachmentUrl = `/uploads/${fileName}`;
+      attachmentType = messagePhoto ? "photo" : "video";
+      messageToSave = ctx.message.caption || null;
+    }
+
+    await saveMessage(
+      newTicketId,
+      fromId,
+      "user",
+      messageToSave,
+      attachmentUrl,
+      attachmentType
+    );
 
     if (ctx.session.supportMessageId) {
       try {
@@ -164,7 +210,14 @@ async function handleSupportMessage(ctx, texts) {
     // Новое уведомление со ссылкой на сайт
     const userLink = `[${ctx.from.first_name}](tg://user?id=${fromId})`;
     const webchatLink = `${process.env.WEB_APP_URL}/messenger/chat/${userFromDb.id}`;
-    const initialMessage = `❗️Новая заявка #${newTicketId} от пользователя ${userLink}.\n\n*Сообщение:* ${messageText}`;
+
+    let initialMessage = `❗️Новая заявка #${newTicketId} от пользователя ${userLink}.`;
+    if (messageToSave) {
+      initialMessage += `\n\n*Сообщение:* ${messageToSave}`;
+    }
+    if (attachmentUrl) {
+      initialMessage += `\n\n*Вложение:* [${attachmentType}](${process.env.WEB_APP_URL}${attachmentUrl})`;
+    }
 
     const keyboard = Markup.inlineKeyboard([
       Markup.button.url("Перейти к чату", webchatLink),
