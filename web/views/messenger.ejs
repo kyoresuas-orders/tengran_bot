@@ -60,22 +60,24 @@
             class="message <%= message.sender_type === 'manager' ? 'sent' : 'received' %>"
           >
             <div class="message-bubble">
-              <% if (message.attachment_url) { %> <% if (message.attachment_type
-              === 'photo') { %>
-              <img
-                src="<%= message.attachment_url %>"
-                alt="Attachment"
-                style="max-width: 200px; border-radius: 8px"
-              />
-              <% } else if (message.attachment_type === 'video') { %>
-              <video
-                src="<%= message.attachment_url %>"
-                controls
-                style="max-width: 200px; border-radius: 8px"
-              ></video>
-              <% } %> <% } %> <% if (message.message) { %>
-              <p><%= message.message %></p>
-              <% } %>
+              <div class="message-content">
+                <% if (message.attachment_url) { %> <% if
+                (message.attachment_type === 'photo') { %>
+                <img
+                  src="<%= message.attachment_url %>"
+                  alt="Attachment"
+                  style="max-width: 200px; border-radius: 8px"
+                />
+                <% } else if (message.attachment_type === 'video') { %>
+                <video
+                  src="<%= message.attachment_url %>"
+                  controls
+                  style="max-width: 200px; border-radius: 8px"
+                ></video>
+                <% } %> <% } %> <% if (message.message) { %>
+                <p><%= message.message %></p>
+                <% } %>
+              </div>
             </div>
           </div>
           <% lastTicketId = message.ticket_id; %> <% }); %>
