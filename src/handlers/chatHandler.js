@@ -154,6 +154,18 @@ async function handleSupportMessage(ctx, texts) {
     ctx.session.state = null; // Сбрасываем состояние
 
     const newTicketId = await createTicket(userFromDb.id);
+    const contextMessage = ctx.session.supportContextMessage;
+    if (contextMessage) {
+      // Save the context message from the manager/system
+      await saveMessage(
+        newTicketId,
+        process.env.SUPPORT_CHAT_ID,
+        "manager",
+        contextMessage
+      );
+      // Clear it from session
+      ctx.session.supportContextMessage = null;
+    }
 
     let attachmentUrl = null;
     let attachmentType = null;

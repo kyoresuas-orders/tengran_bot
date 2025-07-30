@@ -21,6 +21,7 @@ async function initiateSupportFlow(ctx, text) {
   }
 
   ctx.session.state = "awaiting_support_message";
+  ctx.session.supportContextMessage = text;
   const message = await ctx.editMessageText(text, supportBackKeyboard);
   ctx.session.supportMessageId = message.message_id;
 }

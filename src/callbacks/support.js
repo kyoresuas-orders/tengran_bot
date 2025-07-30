@@ -23,9 +23,11 @@ module.exports = {
     }
 
     ctx.session.state = "awaiting_support_message";
+    const supportMessageText = texts.support_requests.menu;
+    ctx.session.supportContextMessage = supportMessageText;
 
     const message = await ctx.editMessageText(
-      texts.support_requests.menu,
+      supportMessageText,
       supportBackKeyboard
     );
 
