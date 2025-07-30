@@ -1,17 +1,12 @@
-const {
-  mainMenuKeyboard,
-  supportKeyboard,
-  createAcceptTicketKeyboard,
-} = require("../data/keyboards");
+const { mainMenuKeyboard } = require("../data/keyboards");
 const { Markup } = require("telegraf");
-const { findUserById, isAdmin } = require("../database/users");
+const { findUserById } = require("../database/users");
 const axios = require("axios");
 const {
   createTicket,
   getOpenTicketByUserId,
   saveMessage,
   closeTicket,
-  getOpenTicketByManagerId,
   getTicketById,
   setTicketSupportChatMessageId,
   getMessagesByTicketId,
@@ -37,20 +32,50 @@ async function handleSupportMessage(ctx, texts) {
   // Проверяем, есть ли уже открытый тикет
   const openTicketForUser = await getOpenTicketByUserId(userFromDb.id);
   if (openTicketForUser) {
-    // Логика закрытия тикета, если он в процессе
-    if (
-      openTicketForUser.status === "in_progress" &&
-      messageText === "Завершить диалог"
-    ) {
+    if (messageText === "Завершить диалог") {
       await closeTicket(openTicketForUser.id);
-      await updateClosedTicketMessage(ctx, openTicketForUser, "пользователем");
-      // Уведомляем менеджера и убираем у него клавиатуру
-      await ctx.telegram.sendMessage(
-        openTicketForUser.manager_id,
-        `Пользователь ${ctx.from.first_name} завершил диалог.`,
-        Markup.removeKeyboard()
-      );
-      // Возвращаем пользователю главное меню
+
+      // Notify web clients that ticket is closed
+      try {
+        await axios.post(
+          `${process.env.WEB_APP_URL}/api/ticket-closed-by-user`,
+          {
+            userId: userFromDb.id,
+          }
+        );
+      } catch (error) {
+        console.error(
+          "Failed to send ticket-closed notification to web server",
+          error.message
+        );
+      }
+
+      // Отправляем уведомление в чат поддержки (если он есть)
+      if (openTicketForUser.support_chat_message_id) {
+        try {
+          await updateClosedTicketMessage(
+            ctx,
+            openTicketForUser,
+            "пользователем"
+          );
+        } catch (e) {
+          console.error(
+            "Failed to update support chat message on user close.",
+            e
+          );
+        }
+      }
+
+      // Отправляем уведомление менеджеру, если он был назначен
+      if (openTicketForUser.manager_id) {
+        await ctx.telegram.sendMessage(
+          openTicketForUser.manager_id,
+          `Пользователь ${ctx.from.first_name} завершил диалог.`,
+          Markup.removeKeyboard()
+        );
+      }
+
+      // Возвращаем пользователю главное меню и убираем клавиатуру
       await ctx.reply("Диалог с поддержкой завершен.", Markup.removeKeyboard());
       await ctx.reply(texts.commands.start.authorized, mainMenuKeyboard);
 

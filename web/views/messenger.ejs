@@ -38,6 +38,16 @@
         <% if (currentChatUser) { %>
         <div class="chat-header">
           <h3><%= currentChatUser.first_name %></h3>
+          <% if (ticketIsOpen) { %>
+          <form
+            action="/messenger/chat/<%= currentChatUser.id %>/close"
+            method="post"
+          >
+            <button type="submit" class="close-ticket-btn">
+              Закрыть тикет
+            </button>
+          </form>
+          <% } %>
         </div>
         <div class="message-list">
           <% let lastTicketId = null; %> <% messages.forEach(message => { %> <%
@@ -92,13 +102,6 @@
 
       ws.onopen = () => {
         console.log("WebSocket connection established");
-        // Register this client with its user ID
-        ws.send(
-          JSON.stringify({
-            type: "register",
-            payload: { userId: userId },
-          })
-        );
       };
 
       ws.onmessage = (event) => {
@@ -109,6 +112,39 @@
           data.payload.userId.toString() === userId
         ) {
           appendMessage(data.payload.message, "received");
+        }
+
+        if (
+          data.type === "ticketClosed" &&
+          data.payload.userId.toString() === userId
+        ) {
+          const closeButtonForm = document.querySelector(".chat-header form");
+          if (closeButtonForm) {
+            closeButtonForm.remove();
+          }
+          const chatItem = document.querySelector(
+            `.chat-item[href*="/messenger/chat/${userId}"]`
+          );
+          if (chatItem) {
+            chatItem.classList.add("chat-item--closed");
+            const lastMessageElement = chatItem.querySelector(".last-message");
+            if (lastMessageElement) {
+              lastMessageElement.textContent = "Клиент завершил диалог";
+            }
+          }
+
+          // Add system message to chat window
+          const systemMessageDiv = document.createElement("div");
+          systemMessageDiv.className = "ticket-separator";
+          const systemMessageSpan = document.createElement("span");
+          systemMessageSpan.textContent = "Клиент завершил диалог";
+          systemMessageDiv.appendChild(systemMessageSpan);
+          messageList.appendChild(systemMessageDiv);
+          messageList.scrollTop = messageList.scrollHeight;
+        }
+
+        if (data.type === "error") {
+          alert(data.payload.message);
         }
       };
 

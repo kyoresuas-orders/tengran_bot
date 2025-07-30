@@ -9,5 +9,10 @@ router.get(
   requireLogin,
   messengerController.getChat
 );
+router.post(
+  "/messenger/chat/:userId/close",
+  requireLogin,
+  messengerController.closeChatTicket
+);
 
 module.exports = router;

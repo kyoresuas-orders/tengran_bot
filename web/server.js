@@ -21,6 +21,9 @@ const app = express();
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
 
+app.locals.wss = wss; // Make wss available to controllers
+app.locals.managerWebsockets = new Set(); // Use Set from app.locals
+
 const port = 3000;
 
 app.set("view engine", "ejs");
@@ -38,9 +41,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json()); // Для парсинга JSON-тела от бота
 app.use(sessionParser);
 
-// Map to store userId and jejich WebSocket
-const clients = new Map();
-
 wss.on("connection", (ws, req) => {
   sessionParser(req, {}, () => {
     if (!req.session.loggedin) {
@@ -48,14 +48,15 @@ wss.on("connection", (ws, req) => {
       return;
     }
 
+    app.locals.managerWebsockets.add(ws);
+    console.log(
+      "Manager client connected. Total clients:",
+      app.locals.managerWebsockets.size
+    );
+
     ws.on("message", async (message) => {
       try {
         const data = JSON.parse(message);
-
-        if (data.type === "register") {
-          clients.set(data.payload.userId, ws);
-          ws.userId = data.payload.userId;
-        }
 
         if (data.type === "sendMessage") {
           const { userId, message } = data.payload;
@@ -70,15 +71,6 @@ wss.on("connection", (ws, req) => {
 
           let ticket = await getOpenTicketByUserId(userId);
 
-          // Если открытого тикета нет, создаем новый
-          if (!ticket) {
-            const newTicketId = await createTicket(userId);
-            ticket = { id: newTicketId };
-            console.log(
-              `Created new ticket #${newTicketId} for user ID ${userId}`
-            );
-          }
-
           if (ticket) {
             await saveMessage(
               ticket.id,
@@ -86,7 +78,24 @@ wss.on("connection", (ws, req) => {
               "manager",
               message
             );
-            await bot.telegram.sendMessage(user.telegram_id, message);
+            const { supportKeyboard } = require("../src/data/keyboards");
+            await bot.telegram.sendMessage(
+              user.telegram_id,
+              message,
+              supportKeyboard
+            );
+          } else {
+            console.log(
+              `Manager tried to message user ${userId} without an open ticket.`
+            );
+            ws.send(
+              JSON.stringify({
+                type: "error",
+                payload: {
+                  message: "Нельзя написать пользователю без открытого тикета.",
+                },
+              })
+            );
           }
         }
       } catch (error) {
@@ -95,30 +104,52 @@ wss.on("connection", (ws, req) => {
     });
 
     ws.on("close", () => {
-      if (ws.userId) {
-        clients.delete(ws.userId);
-      }
-      console.log("Client disconnected");
+      app.locals.managerWebsockets.delete(ws);
+      console.log(
+        "Manager client disconnected. Total clients:",
+        app.locals.managerWebsockets.size
+      );
     });
-
-    console.log("Client connected");
   });
+});
+
+app.post("/api/ticket-closed-by-user", (req, res) => {
+  const { userId } = req.body;
+
+  app.locals.managerWebsockets.forEach((client) => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(
+        JSON.stringify({
+          type: "ticketClosed",
+          payload: { userId },
+        })
+      );
+    }
+  });
+
+  res.status(200).send("Notification sent");
 });
 
 app.post("/api/message-from-bot", (req, res) => {
   const { userId, message } = req.body;
-  const clientWs = clients.get(userId.toString());
 
-  if (clientWs && clientWs.readyState === WebSocket.OPEN) {
-    clientWs.send(
-      JSON.stringify({
-        type: "newMessage",
-        payload: { userId, message },
-      })
-    );
-    res.status(200).send("Message sent to client");
+  let clientFound = false;
+  app.locals.managerWebsockets.forEach((client) => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(
+        JSON.stringify({
+          type: "newMessage",
+          payload: { userId, message },
+        })
+      );
+      clientFound = true;
+    }
+  });
+
+  if (clientFound) {
+    res.status(200).send("Message sent to client(s)");
   } else {
-    res.status(404).send("Client not connected");
+    res.status(404).send("No manager clients connected");
   }
 });
 
