@@ -85,18 +85,41 @@ const getMessagesByUserId = async (userId) => {
 
 const getChats = async () => {
   const [rows] = await pool.execute(`
-        SELECT
-            u.id AS user_id,
-            u.first_name AS user_first_name,
-            (SELECT sm.message FROM support_messages sm JOIN support_tickets st ON sm.ticket_id = st.id WHERE st.user_id = u.id ORDER BY sm.created_at DESC LIMIT 1) AS last_message,
-            (SELECT sm.created_at FROM support_messages sm JOIN support_tickets st ON sm.ticket_id = st.id WHERE st.user_id = u.id ORDER BY sm.created_at DESC LIMIT 1) AS last_message_time
-        FROM
-            users u
-        WHERE
-            EXISTS (SELECT 1 FROM support_tickets st WHERE st.user_id = u.id)
-        ORDER BY
-            last_message_time DESC
-    `);
+    SELECT
+        u.id AS user_id,
+        u.first_name AS user_first_name,
+        latest_message.message AS last_message,
+        latest_message.created_at AS last_message_time,
+        latest_message.sender_type AS last_sender_type,
+        t.status AS ticket_status
+    FROM
+        users u
+    JOIN (
+        SELECT 
+            st.user_id,
+            MAX(st.id) AS max_ticket_id
+        FROM support_tickets st
+        GROUP BY st.user_id
+    ) AS latest_ticket ON u.id = latest_ticket.user_id
+    JOIN support_tickets t ON latest_ticket.max_ticket_id = t.id
+    LEFT JOIN (
+        SELECT 
+            sm.ticket_id,
+            sm.message,
+            sm.created_at,
+            sm.sender_type,
+            ROW_NUMBER() OVER(PARTITION BY sm.ticket_id ORDER BY sm.created_at DESC) as rn
+        FROM support_messages sm
+    ) AS latest_message ON t.id = latest_message.ticket_id AND latest_message.rn = 1
+    WHERE
+        EXISTS (SELECT 1 FROM support_tickets st WHERE st.user_id = u.id)
+    ORDER BY
+        CASE 
+            WHEN t.status = 'closed' THEN 1
+            ELSE 0
+        END,
+        last_message_time DESC
+  `);
   return rows;
 };
 

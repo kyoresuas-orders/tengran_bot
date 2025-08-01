@@ -16,8 +16,12 @@ const bot = new Telegraf(process.env.BOT_TOKEN);
 const getMessengerPage = async (req, res) => {
   try {
     const chats = await getChats();
+    const openChats = chats.filter((chat) => chat.ticket_status !== "closed");
+    const closedChats = chats.filter((chat) => chat.ticket_status === "closed");
+
     res.render("messenger", {
-      chats,
+      openChats,
+      closedChats,
       currentChatUser: null,
       messages: [],
       selectedUserId: null,
@@ -32,12 +36,16 @@ const getChat = async (req, res) => {
   try {
     const { userId } = req.params;
     const chats = await getChats();
+    const openChats = chats.filter((chat) => chat.ticket_status !== "closed");
+    const closedChats = chats.filter((chat) => chat.ticket_status === "closed");
+
     const messages = await getMessagesByUserId(userId);
     const currentChatUser = await findUserByDbId(userId);
     const currentTicket = await getOpenTicketByUserId(userId);
 
     res.render("messenger", {
-      chats,
+      openChats,
+      closedChats,
       messages,
       currentChatUser,
       selectedUserId: userId,

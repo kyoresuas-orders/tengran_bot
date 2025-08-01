@@ -13,25 +13,54 @@
           <h2>Чаты</h2>
         </div>
         <div class="chat-list">
-          <% chats.forEach(chat => { %>
-          <a
-            href="/messenger/chat/<%= chat.user_id %>"
-            class="chat-item <% if(currentChatUser && currentChatUser.id === chat.user_id) { %>active<% } %>"
-          >
-            <div class="chat-info">
-              <div class="chat-name"><%= chat.user_first_name %></div>
-              <div class="last-message"><%= chat.last_message %></div>
-            </div>
-            <div class="chat-meta">
-              <% if (chat.last_message_time) { %>
-              <div class="last-message-time">
-                <%= new Date(chat.last_message_time).toLocaleTimeString('ru-RU',
-                { hour: '2-digit', minute: '2-digit' }) %>
+          <div class="chat-group">
+            <h3>Открытые</h3>
+            <% openChats.forEach(chat => { %>
+            <a
+              href="/messenger/chat/<%= chat.user_id %>"
+              class="chat-item <% if(currentChatUser && currentChatUser.id === chat.user_id) { %>active<% } %>"
+            >
+              <div class="chat-info">
+                <div class="chat-name"><%= chat.user_first_name %></div>
+                <div class="last-message"><%= chat.last_message %></div>
               </div>
-              <% } %>
-            </div>
-          </a>
-          <% }); %>
+              <div class="chat-meta">
+                <% if (chat.last_message_time) { %>
+                <div class="last-message-time">
+                  <%= new
+                  Date(chat.last_message_time).toLocaleTimeString('ru-RU', {
+                  hour: '2-digit', minute: '2-digit' }) %>
+                </div>
+                <% } %> <% if (chat.last_sender_type === 'user') { %>
+                <div class="unread-indicator"></div>
+                <% } %>
+              </div>
+            </a>
+            <% }); %>
+          </div>
+          <div class="chat-group">
+            <h3>Завершенные</h3>
+            <% closedChats.forEach(chat => { %>
+            <a
+              href="/messenger/chat/<%= chat.user_id %>"
+              class="chat-item <% if(currentChatUser && currentChatUser.id === chat.user_id) { %>active<% } %>"
+            >
+              <div class="chat-info">
+                <div class="chat-name"><%= chat.user_first_name %></div>
+                <div class="last-message"><%= chat.last_message %></div>
+              </div>
+              <div class="chat-meta">
+                <% if (chat.last_message_time) { %>
+                <div class="last-message-time">
+                  <%= new
+                  Date(chat.last_message_time).toLocaleTimeString('ru-RU', {
+                  hour: '2-digit', minute: '2-digit' }) %>
+                </div>
+                <% } %>
+              </div>
+            </a>
+            <% }); %>
+          </div>
         </div>
       </div>
       <div class="chat-window">
