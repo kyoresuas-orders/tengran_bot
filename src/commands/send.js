@@ -56,5 +56,7 @@ const sendCommand = {
   },
 };
 
-module.exports = sendCommand;
-module.exports.activeBroadcasts = activeBroadcasts;
+module.exports = {
+  sendCommand,
+  activeBroadcasts,
+};
