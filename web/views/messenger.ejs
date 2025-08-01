@@ -117,6 +117,7 @@
         </div>
         <div class="message-input-area">
           <div id="attachment-preview-container"></div>
+          <% if (ticketIsOpen) { %>
           <div class="message-input">
             <form id="message-form" enctype="multipart/form-data">
               <input
@@ -163,6 +164,11 @@
               </button>
             </form>
           </div>
+          <% } else { %>
+          <div class="message-input-disabled">
+            <span>Тикет закрыт. Вы не можете отправлять сообщения.</span>
+          </div>
+          <% } %>
         </div>
         <% } else { %>
         <div class="no-chat-selected">

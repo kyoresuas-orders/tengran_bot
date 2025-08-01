@@ -536,3 +536,11 @@ button:hover {
   background-color: #e2e8f0;
   z-index: 0;
 }
+
+.message-input-disabled {
+  padding: 24px;
+  text-align: center;
+  color: #94a3b8;
+  font-style: italic;
+  background-color: #f8fafc;
+}
