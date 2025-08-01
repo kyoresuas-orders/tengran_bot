@@ -17,6 +17,54 @@ const path = require("path");
 
 const localApiUrl = "http://localhost:3000";
 
+async function notifySupportChatAboutNewMessage(
+  ctx,
+  ticket,
+  user,
+  message,
+  attachment
+) {
+  if (!ticket.support_chat_message_id) {
+    console.error(
+      `Ticket ${ticket.id} has no support_chat_message_id, cannot notify chat.`
+    );
+    return;
+  }
+
+  const userLink = `[${user.first_name}](tg://user?id=${user.telegram_id})`;
+  let notificationMessage = `💬 Новое сообщение в заявке #${ticket.id} от ${userLink}`;
+
+  if (message) {
+    notificationMessage += `\n\n*Сообщение:* ${message}`;
+  }
+
+  if (attachment) {
+    notificationMessage += `\n\n*Вложение:* [${attachment.type}](${process.env.WEB_APP_URL}${attachment.url})`;
+  }
+
+  const webchatLink = `${process.env.WEB_APP_URL}/messenger/chat/${user.id}`;
+  const keyboard = Markup.inlineKeyboard([
+    Markup.button.url("Перейти к чату", webchatLink),
+  ]);
+
+  try {
+    await ctx.telegram.sendMessage(
+      process.env.SUPPORT_CHAT_ID,
+      notificationMessage,
+      {
+        reply_to_message_id: ticket.support_chat_message_id,
+        parse_mode: "Markdown",
+        ...keyboard,
+      }
+    );
+  } catch (e) {
+    console.error(
+      `Failed to send notification to support chat for ticket ${ticket.id}`,
+      e
+    );
+  }
+}
+
 async function handleSupportMessage(ctx, texts) {
   const fromId = ctx.from.id;
   const messageText = ctx.message.text;
@@ -122,6 +170,14 @@ async function handleSupportMessage(ctx, texts) {
           attachmentType
         );
 
+        await notifySupportChatAboutNewMessage(
+          ctx,
+          openTicketForUser,
+          userFromDb,
+          caption,
+          { type: attachmentType, url: attachmentUrl }
+        );
+
         try {
           await axios.post(`${localApiUrl}/api/message-from-bot`, {
             userId: userFromDb.id,
@@ -143,6 +199,14 @@ async function handleSupportMessage(ctx, texts) {
           "user",
           messageText,
           null,
+          null
+        );
+
+        await notifySupportChatAboutNewMessage(
+          ctx,
+          openTicketForUser,
+          userFromDb,
+          messageText,
           null
         );
 
