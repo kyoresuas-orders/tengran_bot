@@ -7,7 +7,9 @@
     <link rel="stylesheet" href="/style.css" />
   </head>
   <body>
-    <div class="messenger-container">
+    <div
+      class="messenger-container <% if (currentChatUser) { %>chat-view-active<% } %>"
+    >
       <div class="sidebar">
         <div class="sidebar-header">
           <h2>Чаты</h2>
@@ -66,7 +68,24 @@
       <div class="chat-window">
         <% if (currentChatUser) { %>
         <div class="chat-header">
-          <h3><%= currentChatUser.first_name %></h3>
+          <div class="chat-header-user">
+            <button id="back-to-chats" class="back-btn">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+            </button>
+            <h3><%= currentChatUser.first_name %></h3>
+          </div>
           <% if (ticketIsOpen) { %>
           <form
             action="/messenger/chat/<%= currentChatUser.id %>/close"
@@ -177,7 +196,20 @@
         <% } %>
       </div>
     </div>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const backButton = document.getElementById("back-to-chats");
+        const container = document.querySelector(".messenger-container");
 
+        if (backButton) {
+          backButton.addEventListener("click", () => {
+            container.classList.remove("chat-view-active");
+            // Also update the URL to reflect the change
+            history.pushState(null, "", "/messenger");
+          });
+        }
+      });
+    </script>
     <% if (currentChatUser) { %>
     <script>
       const messageList = document.querySelector(".message-list");
