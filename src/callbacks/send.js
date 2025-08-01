@@ -1,5 +1,5 @@
 const { getAllUsers, isAdmin } = require("../database/users");
-const { activeBroadcasts } = require("../commands/send");
+const { activeBroadcasts } = require("../state/broadcastState");
 
 const sendCallback = {
   name: "send",
@@ -56,6 +56,7 @@ const sendCallback = {
           );
           failedCount++;
         }
+        // Добавим небольшую задержку, чтобы не превышать лимиты Telegram
         await new Promise((resolve) => setTimeout(resolve, 100));
       }
 

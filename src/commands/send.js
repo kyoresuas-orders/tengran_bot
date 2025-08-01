@@ -1,7 +1,6 @@
 const { isAdmin } = require("../database/users");
 const { Markup } = require("telegraf");
-
-const activeBroadcasts = new Map();
+const { activeBroadcasts } = require("../state/broadcastState");
 
 const sendCommand = {
   name: "send",
@@ -56,7 +55,4 @@ const sendCommand = {
   },
 };
 
-module.exports = {
-  sendCommand,
-  activeBroadcasts,
-};
+module.exports = sendCommand;
