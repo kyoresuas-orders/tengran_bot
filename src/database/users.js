@@ -77,10 +77,21 @@ const findUserByDbId = async (id) => {
   }
 };
 
+const getUsersCount = async () => {
+  try {
+    const [rows] = await pool.execute("SELECT COUNT(*) as count FROM `users`");
+    return rows[0].count;
+  } catch (error) {
+    console.error("Ошибка в getUsersCount:", error);
+    throw error;
+  }
+};
+
 module.exports = {
   findUserById,
   createUser,
   isAdmin,
   getAllUsers,
   findUserByDbId,
+  getUsersCount,
 };

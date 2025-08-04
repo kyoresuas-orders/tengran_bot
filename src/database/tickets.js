@@ -123,6 +123,22 @@ const getChats = async () => {
   return rows;
 };
 
+const getTicketsCountByStatus = async (status) => {
+  try {
+    let query = "SELECT COUNT(*) as count FROM `support_tickets`";
+    const params = [];
+    if (status) {
+      query += " WHERE `status` = ?";
+      params.push(status);
+    }
+    const [rows] = await pool.execute(query, params);
+    return rows[0].count;
+  } catch (error) {
+    console.error("Ошибка в getTicketsCountByStatus:", error);
+    throw error;
+  }
+};
+
 module.exports = {
   createTicket,
   getOpenTicketByUserId,
@@ -135,4 +151,5 @@ module.exports = {
   setTicketSupportChatMessageId,
   getChats,
   getMessagesByUserId,
+  getTicketsCountByStatus,
 };
