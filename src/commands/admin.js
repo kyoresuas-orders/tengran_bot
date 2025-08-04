@@ -26,21 +26,15 @@ module.exports = {
         - Закрытые: ${closedTickets}
         `;
 
-        await bot.reply(message.chat.id, adminMenu, {
+        await bot.reply(adminMenu, {
           parse_mode: "HTML",
         });
       } catch (error) {
         console.error("Ошибка при получении статистики:", error);
-        await bot.reply(
-          message.chat.id,
-          "Произошла ошибка при получении статистики."
-        );
+        await bot.reply("Произошла ошибка при получении статистики.");
       }
     } else {
-      await bot.reply(
-        message.chat.id,
-        "У вас нет прав для выполнения этой команды."
-      );
+      await bot.reply("У вас нет прав для выполнения этой команды.");
     }
   },
 };
