@@ -4,8 +4,8 @@ const { getTicketsCountByStatus } = require("../database/tickets");
 module.exports = {
   name: "admin",
   description: "Показывает статистику для администратора.",
-  async execute(message, bot) {
-    const telegramId = message.from.id;
+  async execute(ctx) {
+    const telegramId = ctx.from.id;
 
     if (await isAdmin(telegramId)) {
       try {
@@ -26,15 +26,15 @@ module.exports = {
         - Закрытые: ${closedTickets}
         `;
 
-        await bot.reply(adminMenu, {
+        await ctx.reply(adminMenu, {
           parse_mode: "HTML",
         });
       } catch (error) {
         console.error("Ошибка при получении статистики:", error);
-        await bot.reply("Произошла ошибка при получении статистики.");
+        await ctx.reply("Произошла ошибка при получении статистики.");
       }
     } else {
-      await bot.reply("У вас нет прав для выполнения этой команды.");
+      await ctx.reply("У вас нет прав для выполнения этой команды.");
     }
   },
 };
