@@ -14,15 +14,7 @@ module.exports = {
         const closedTickets = await getTicketsCountByStatus("closed");
 
         const adminMenu = `
-        <b>Меню администратора</b>
-        
-        <b>Пользователи:</b>
-        - Всего: ${totalUsers}
-
-        <b>Тикеты:</b>
-        - В ожидании: ${pendingTickets}
-        - В обработке: ${inProgressTickets}
-        - Закрытые: ${closedTickets}
+        <b>Меню администратора</b>\n\n<b>Пользователи:</b>\n- Всего: ${totalUsers}\n\n<b>Тикеты:</b>\n- В ожидании: ${pendingTickets}\n- В обработке: ${inProgressTickets}\n- Закрытые: ${closedTickets}
         `;
 
         await ctx.reply(adminMenu, {
