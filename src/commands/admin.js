@@ -3,8 +3,7 @@ const { getTicketsCountByStatus } = require("../database/tickets");
 
 module.exports = {
   name: "admin",
-  description: "Показывает статистику для администратора.",
-  async execute(ctx) {
+  execute: async (ctx) => {
     const telegramId = ctx.from.id;
 
     if (await isAdmin(telegramId)) {
