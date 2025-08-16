@@ -48,10 +48,24 @@ const sendCommand = {
       ],
     ]);
 
-    await ctx.reply("Вы уверены, что хотите отправить это сообщение?", {
-      ...confirmationKeyboard,
-      reply_to_message_id: ctx.message.message_id,
-    });
+    // Предпросмотр сообщения для администратора c кнопками подтверждения
+    if (broadcast.message.photo) {
+      const photoArray = broadcast.message.photo;
+      const largestPhoto = photoArray[photoArray.length - 1];
+      await ctx.replyWithPhoto(largestPhoto.file_id, {
+        caption: broadcast.message.caption || "",
+        parse_mode: "HTML",
+        ...confirmationKeyboard,
+        reply_to_message_id: ctx.message.message_id,
+      });
+    } else if (broadcast.message.text) {
+      await ctx.reply(broadcast.message.text, {
+        parse_mode: "HTML",
+        disable_web_page_preview: true,
+        ...confirmationKeyboard,
+        reply_to_message_id: ctx.message.message_id,
+      });
+    }
   },
 };
 

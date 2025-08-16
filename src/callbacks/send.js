@@ -20,7 +20,17 @@ const sendCallback = {
 
     if (data === "send:confirm") {
       activeBroadcasts.delete(userId);
-      await ctx.editMessageText("Начинаю рассылку...");
+      // Сообщение с кнопками могло быть как текстом, так и фото с подписью
+      const isPhotoMessage = Boolean(
+        ctx.callbackQuery &&
+          ctx.callbackQuery.message &&
+          ctx.callbackQuery.message.photo
+      );
+      if (isPhotoMessage) {
+        await ctx.editMessageCaption("Начинаю рассылку...");
+      } else {
+        await ctx.editMessageText("Начинаю рассылку...");
+      }
 
       const users = await getAllUsers();
       let sentCount = 0;
